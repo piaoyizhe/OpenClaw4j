@@ -3,11 +3,7 @@ package com.openclaw.brain;
 import com.openclaw.model.manager.MemoryManager;
 import com.openclaw.model.manager.LongTermMemoryManager;
 import com.openclaw.model.service.MemorySearch;
-import com.openclaw.utils.LLMClient;
-
-import com.openclaw.utils.ApplicationContext;
-import com.openclaw.utils.OpenClawException;
-import com.openclaw.utils.ErrorHandler;
+import com.openclaw.utils.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -249,6 +245,8 @@ public class Prefrontal {
             if (!userContent.isEmpty()) {
                 systemPrompt.append("# 用户信息\n").append(userContent).append("\n\n");
             }
+            systemPrompt.append("# 当前时间\n").append(DateUtils.getString()).append("\n\n");
+
             systemPrompt.append("你如果有疑问的地方或者用户描述的不够准确的地方你可以进行提出问题，直到满足你想要了解的所有内容为止").append("\n\n");
 
             JSONObject systemMsg = new JSONObject();
@@ -279,15 +277,15 @@ public class Prefrontal {
         // 循环处理工具调用
         while (true) {
             // 检查是否有tool_calls
-            if (messageResponse.has("tool_calls") && !messageResponse.isNull("tool_calls")) {
-                // 检查是否有content直接返回
-//                if (messageResponse.has("content") && !messageResponse.isNull("content")&&!"".equals(messageResponse.getString("content"))) {
+                if (messageResponse.has("tool_calls") && !messageResponse.isNull("tool_calls")) {
+                    // 检查是否有content直接返回
+//                if (messageResponse.has("content") && !messageResponse.isNull("content") && !"".equals(messageResponse.getString("content"))) {
 //                    System.out.println("工具助手回复：" + messageResponse.getString("content"));
 //                }
 
-                JSONArray toolCalls = messageResponse.getJSONArray("tool_calls");
+                    JSONArray toolCalls = messageResponse.getJSONArray("tool_calls");
 
-                if (toolCalls != null && toolCalls.length() > 0) {
+                    if (toolCalls != null && toolCalls.length() > 0) {
                     // 添加助手消息（包含tool_calls）
                     JSONObject toolCallMessage = new JSONObject();
                     toolCallMessage.put("role", "assistant");

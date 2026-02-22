@@ -1,9 +1,10 @@
 package com.openclaw.tools;
 
+import com.openclaw.model.entity.ToolParameters;
+import com.openclaw.model.entity.ToolResult;
 import okhttp3.*;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 

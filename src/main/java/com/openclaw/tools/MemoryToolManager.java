@@ -2,6 +2,8 @@ package com.openclaw.tools;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.openclaw.model.entity.ToolInfo;
 import com.openclaw.model.manager.LongTermMemoryManager;
 import com.openclaw.model.manager.MemoryManager;
 import com.openclaw.model.service.MemorySearch;

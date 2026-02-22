@@ -248,6 +248,8 @@ public class Hippocampus {
      * @return 分析结果
      */
     public MemoryUpdateAnalysis analyzeMemoryUpdate(String targetFile, String newContent, String existingContent, LLMClient.ModelParams params) throws Exception {
+        params.responseFormat="json_object";
+
         String prompt = "你是一个记忆管理专家。请分析以下内容，判断记忆更新需求。\n\n" + 
                         "## 目标文件\n" + targetFile + "\n\n" + 
                         "## 现有内容\n" + existingContent + "\n\n" + 
@@ -358,6 +360,7 @@ public class Hippocampus {
         System.out.println(">>> 目标文件: " + targetFile);
         System.out.println(">>> 新内容长度: " + newContent.length() + " 字符");
         System.out.println(">>> 现有内容长度: " + existingContent.length() + " 字符");
+        params.responseFormat="json_object";
 
         String prompt = "你是一个记忆管理专家。请分析以下内容，处理记忆更新冲突。\n\n" +
                        "## 目标文件\n" + targetFile + "\n\n" +

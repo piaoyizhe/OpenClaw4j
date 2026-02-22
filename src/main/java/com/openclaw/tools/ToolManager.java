@@ -1,5 +1,7 @@
 package com.openclaw.tools;
 
+import com.openclaw.model.entity.ToolInfo;
+
 import java.util.Map;
 
 /**

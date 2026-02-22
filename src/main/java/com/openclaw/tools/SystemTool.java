@@ -1,5 +1,8 @@
 package com.openclaw.tools;
 
+import com.openclaw.model.entity.ToolParameters;
+import com.openclaw.model.entity.ToolResult;
+
 /**
  * 系统工具接口
  * 所有系统工具都需要实现此接口

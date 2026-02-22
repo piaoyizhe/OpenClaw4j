@@ -2,6 +2,8 @@ package com.openclaw.tools;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.openclaw.model.entity.ToolInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

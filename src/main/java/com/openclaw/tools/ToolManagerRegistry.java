@@ -1,5 +1,8 @@
 package com.openclaw.tools;
 
+import com.openclaw.model.entity.ToolInfo;
+import org.json.JSONArray;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -166,10 +169,10 @@ public class ToolManagerRegistry {
      * 获取所有工具信息的JSONArray格式
      * @return JSONArray格式的工具信息
      */
-    public org.json.JSONArray getToolsInfoAsJsonArray() {
-        org.json.JSONArray toolsArray = new org.json.JSONArray();
+    public JSONArray getToolsInfoAsJsonArray() {
+        JSONArray toolsArray = new JSONArray();
         for (ToolManager toolManager : toolManagers.values()) {
-            org.json.JSONArray managerTools = toolManager.getToolsInfoAsJsonArray();
+            JSONArray managerTools = toolManager.getToolsInfoAsJsonArray();
             for (int i = 0; i < managerTools.length(); i++) {
                 toolsArray.put(managerTools.get(i));
             }

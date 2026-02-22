@@ -1,4 +1,4 @@
-package com.openclaw.tools;
+package com.openclaw.model.entity;
 
 import org.json.JSONObject;
 

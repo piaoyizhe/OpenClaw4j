@@ -1,10 +1,11 @@
 package com.openclaw.tools;
 
+import com.openclaw.model.entity.ToolParameters;
+import com.openclaw.model.entity.ToolResult;
+
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 import java.util.concurrent.*;
 
 /**

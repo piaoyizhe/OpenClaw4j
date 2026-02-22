@@ -50,3 +50,13 @@ openclaw:
     chunk_size: 1600  # 分块大小（字符）
     overlap_size: 80   # 重叠大小（字符）
     watch_enabled: true  # 是否启用文件监控
+  # 邮件配置
+  mail:
+    enabled: true
+    host: smtp.qq.com
+    port: 465
+    username: xxxxxxx@qq.com
+    password: tgpskgbbshqzabcd
+    from: xxxxxxx@qq.com
+    ssl: true
+    timeout: 30000

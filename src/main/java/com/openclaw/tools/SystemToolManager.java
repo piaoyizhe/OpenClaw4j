@@ -1,5 +1,7 @@
 package com.openclaw.tools;
 
+import com.openclaw.model.entity.ToolInfo;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,8 +46,8 @@ public class SystemToolManager extends AbstractToolManager {
         // 注册邮件发送工具
         Map<String, String> emailParams = new ConcurrentHashMap<>();
         emailParams.put("to", "收件人邮箱地址");
-        emailParams.put("subject", "邮件主题");
-        emailParams.put("body", "邮件正文");
+        emailParams.put("subject", "邮件主题（姓名 - 内容标题）");
+        emailParams.put("body", "邮件正文（不要使用markdown的正文）");
         registerTool("send_email", "发送邮件到指定邮箱", emailParams, (ToolInfo.ToolCaller) parameters -> {
             try {
                 String to = (String) parameters.get("to");
@@ -69,6 +71,88 @@ public class SystemToolManager extends AbstractToolManager {
                 return content;
             } catch (Exception e) {
                 return "回复用户失败: " + e.getMessage();
+            }
+        });
+
+        // 注册写日报工具
+        Map<String, String> writeDailyParams = new ConcurrentHashMap<>();
+        writeDailyParams.put("content", "日报内容");
+        writeDailyParams.put("date", "日期（格式：yyyy-MM-dd），可选");
+        registerTool("write_daily_report", "写日报", writeDailyParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String content = (String) parameters.get("content");
+                String date = (String) parameters.get("date");
+                com.openclaw.utils.WorkUtils workUtils = com.openclaw.utils.WorkUtils.getInstance();
+                return workUtils.writeDailyReport(content, date);
+            } catch (Exception e) {
+                return "写日报失败: " + e.getMessage();
+            }
+        });
+
+        // 注册读日报工具
+        Map<String, String> readDailyParams = new ConcurrentHashMap<>();
+        readDailyParams.put("date", "日期（格式：yyyy-MM-dd），可选");
+        registerTool("read_daily_report", "读日报", readDailyParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String date = (String) parameters.get("date");
+                com.openclaw.utils.WorkUtils workUtils = com.openclaw.utils.WorkUtils.getInstance();
+                return workUtils.readDailyReport(date);
+            } catch (Exception e) {
+                return "读日报失败: " + e.getMessage();
+            }
+        });
+
+        // 注册写周报工具
+        Map<String, String> writeWeeklyParams = new ConcurrentHashMap<>();
+        writeWeeklyParams.put("content", "周报内容");
+        writeWeeklyParams.put("year", "年份，可选");
+        writeWeeklyParams.put("week", "周数，可选");
+        registerTool("write_weekly_report", "写周报", writeWeeklyParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String content = (String) parameters.get("content");
+                String year = (String) parameters.get("year");
+                String week = (String) parameters.get("week");
+                com.openclaw.utils.WorkUtils workUtils = com.openclaw.utils.WorkUtils.getInstance();
+                return workUtils.writeWeeklyReport(content, year, week);
+            } catch (Exception e) {
+                return "写周报失败: " + e.getMessage();
+            }
+        });
+
+        // 注册读周报工具
+        Map<String, String> readWeeklyParams = new ConcurrentHashMap<>();
+        readWeeklyParams.put("year", "年份，可选");
+        readWeeklyParams.put("week", "周数，可选");
+        registerTool("read_weekly_report", "读周报", readWeeklyParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String year = (String) parameters.get("year");
+                String week = (String) parameters.get("week");
+                com.openclaw.utils.WorkUtils workUtils = com.openclaw.utils.WorkUtils.getInstance();
+                return workUtils.readWeeklyReport(year, week);
+            } catch (Exception e) {
+                return "读周报失败: " + e.getMessage();
+            }
+        });
+
+        // 注册列出日报工具
+        Map<String, String> listDailyParams = new ConcurrentHashMap<>();
+        registerTool("list_daily_reports", "列出所有日报", listDailyParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                com.openclaw.utils.WorkUtils workUtils = com.openclaw.utils.WorkUtils.getInstance();
+                return workUtils.listDailyReports();
+            } catch (Exception e) {
+                return "列出日报失败: " + e.getMessage();
+            }
+        });
+
+        // 注册列出周报工具
+        Map<String, String> listWeeklyParams = new ConcurrentHashMap<>();
+        registerTool("list_weekly_reports", "列出所有周报", listWeeklyParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                com.openclaw.utils.WorkUtils workUtils = com.openclaw.utils.WorkUtils.getInstance();
+                return workUtils.listWeeklyReports();
+            } catch (Exception e) {
+                return "列出周报失败: " + e.getMessage();
             }
         });
 
@@ -124,8 +208,7 @@ public class SystemToolManager extends AbstractToolManager {
      * @return 发送结果
      */
     private String sendEmail(String to, String subject, String body) throws Exception {
-        // 这里实现邮件发送功能
-        // 由于是示例，仅返回模拟结果
-        return "邮件发送成功\n收件人: " + to + "\n主题: " + subject + "\n正文: " + body;
+        com.openclaw.utils.EmailUtils emailUtils = com.openclaw.utils.EmailUtils.getInstance();
+        return emailUtils.sendEmail(to, subject, body);
     }
 }

@@ -1,5 +1,9 @@
 package com.openclaw.tools;
 
+import com.openclaw.model.entity.ToolInfo;
+import com.openclaw.model.entity.ToolParameters;
+import com.openclaw.model.entity.ToolResult;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

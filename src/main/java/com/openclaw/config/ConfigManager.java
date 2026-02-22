@@ -45,12 +45,6 @@ public class ConfigManager {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> getMemoryConfig() {
-        Map<String, Object> openclawConfig = getOpenClawConfig();
-        return (Map<String, Object>) openclawConfig.get("memory");
-    }
-
-    @SuppressWarnings("unchecked")
     public Map<String, Object> getLLMConfig() {
         Map<String, Object> openclawConfig = getOpenClawConfig();
         return (Map<String, Object>) openclawConfig.get("llm");
@@ -60,6 +54,18 @@ public class ConfigManager {
     public Map<String, Object> getConsoleConfig() {
         Map<String, Object> openclawConfig = getOpenClawConfig();
         return (Map<String, Object>) openclawConfig.get("console");
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getMemoryConfig() {
+        Map<String, Object> openclawConfig = getOpenClawConfig();
+        return (Map<String, Object>) openclawConfig.get("memory");
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getLogsConfig() {
+        Map<String, Object> memoryConfig = getMemoryConfig();
+        return (Map<String, Object>) memoryConfig.get("logs");
     }
 
     public String getLLMApiKey() {
@@ -84,30 +90,6 @@ public class ConfigManager {
         return (String) storageConfig.get("directory");
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getDailyLogConfig() {
-        Map<String, Object> memoryConfig = getMemoryConfig();
-        return (Map<String, Object>) memoryConfig.get("daily_log");
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getSQLiteConfig() {
-        Map<String, Object> memoryConfig = getMemoryConfig();
-        return (Map<String, Object>) memoryConfig.get("sqlite");
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getSearchConfig() {
-        Map<String, Object> memoryConfig = getMemoryConfig();
-        return (Map<String, Object>) memoryConfig.get("search");
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getFileIndexerConfig() {
-        Map<String, Object> openclawConfig = getOpenClawConfig();
-        return (Map<String, Object>) openclawConfig.get("file_indexer");
-    }
-
     public String getWelcomeMessage() {
         Map<String, Object> consoleConfig = getConsoleConfig();
         return (String) consoleConfig.get("welcome_message");
@@ -123,81 +105,6 @@ public class ConfigManager {
         return (String) consoleConfig.get("error_message");
     }
 
-    public int getArchiveDays() {
-        Map<String, Object> dailyLogConfig = getDailyLogConfig();
-        return (Integer) dailyLogConfig.get("archive_days");
-    }
-
-    public int getCleanDays() {
-        Map<String, Object> dailyLogConfig = getDailyLogConfig();
-        return (Integer) dailyLogConfig.get("clean_days");
-    }
-
-    public String getSQLiteDbPath() {
-        Map<String, Object> sqliteConfig = getSQLiteConfig();
-        return (String) sqliteConfig.get("db_path");
-    }
-
-    public double getVectorWeight() {
-        Map<String, Object> searchConfig = getSearchConfig();
-        return (Double) searchConfig.get("vector_weight");
-    }
-
-    public double getTextWeight() {
-        Map<String, Object> searchConfig = getSearchConfig();
-        return (Double) searchConfig.get("text_weight");
-    }
-
-    public int getDefaultMaxResults() {
-        Map<String, Object> searchConfig = getSearchConfig();
-        return (Integer) searchConfig.get("default_max_results");
-    }
-
-    public double getDefaultMinScore() {
-        Map<String, Object> searchConfig = getSearchConfig();
-        return (Double) searchConfig.get("default_min_score");
-    }
-
-    public int getChunkSize() {
-        Map<String, Object> fileIndexerConfig = getFileIndexerConfig();
-        return (Integer) fileIndexerConfig.get("chunk_size");
-    }
-
-    public int getOverlapSize() {
-        Map<String, Object> fileIndexerConfig = getFileIndexerConfig();
-        return (Integer) fileIndexerConfig.get("overlap_size");
-    }
-
-    public boolean isWatchEnabled() {
-        Map<String, Object> fileIndexerConfig = getFileIndexerConfig();
-        return (Boolean) fileIndexerConfig.get("watch_enabled");
-    }
-
-
-    
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getToolsConfig() {
-        Map<String, Object> openclawConfig = getOpenClawConfig();
-        return (Map<String, Object>) openclawConfig.get("tools");
-    }
-    
-    public String getWeatherApiKey() {
-        Map<String, Object> toolsConfig = getToolsConfig();
-        if (toolsConfig != null) {
-            Map<String, Object> weatherConfig = (Map<String, Object>) toolsConfig.get("weather");
-            if (weatherConfig != null) {
-                return (String) weatherConfig.get("api_key");
-            }
-        }
-        return null;
-    }
-    
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getLogsConfig() {
-        Map<String, Object> memoryConfig = getMemoryConfig();
-        return (Map<String, Object>) memoryConfig.get("logs");
-    }
-    
     public String getDailyLogCronExpression() {
         Map<String, Object> logsConfig = getLogsConfig();
         if (logsConfig != null) {
@@ -208,7 +115,7 @@ public class ConfigManager {
         }
         return "0 0 22 * * ?"; // 默认每天22:00执行
     }
-    
+
     public String getWeeklyReportCronExpression() {
         Map<String, Object> logsConfig = getLogsConfig();
         if (logsConfig != null) {
@@ -219,7 +126,7 @@ public class ConfigManager {
         }
         return "0 0 22 ? * 6"; // 默认每周六22:00执行
     }
-    
+
     public String getMonthlyReportCronExpression() {
         Map<String, Object> logsConfig = getLogsConfig();
         if (logsConfig != null) {
@@ -230,7 +137,7 @@ public class ConfigManager {
         }
         return "0 0 22 1 * ?"; // 默认每月1日22:00执行
     }
-    
+
     public boolean isDailyLogEnabled() {
         Map<String, Object> logsConfig = getLogsConfig();
         if (logsConfig != null) {
@@ -241,7 +148,7 @@ public class ConfigManager {
         }
         return true;
     }
-    
+
     public boolean isWeeklyReportEnabled() {
         Map<String, Object> logsConfig = getLogsConfig();
         if (logsConfig != null) {
@@ -252,7 +159,7 @@ public class ConfigManager {
         }
         return true;
     }
-    
+
     public boolean isMonthlyReportEnabled() {
         Map<String, Object> logsConfig = getLogsConfig();
         if (logsConfig != null) {
@@ -262,5 +169,75 @@ public class ConfigManager {
             }
         }
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getMailConfig() {
+        Map<String, Object> openclawConfig = getOpenClawConfig();
+        return (Map<String, Object>) openclawConfig.get("mail");
+    }
+
+    public boolean isMailEnabled() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (Boolean) mailConfig.getOrDefault("enabled", false);
+        }
+        return false;
+    }
+
+    public String getMailHost() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (String) mailConfig.get("host");
+        }
+        return "smtp.qq.com";
+    }
+
+    public int getMailPort() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (Integer) mailConfig.get("port");
+        }
+        return 465;
+    }
+
+    public String getMailUsername() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (String) mailConfig.get("username");
+        }
+        return "";
+    }
+
+    public String getMailPassword() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (String) mailConfig.get("password");
+        }
+        return "";
+    }
+
+    public String getMailFrom() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (String) mailConfig.get("from");
+        }
+        return "";
+    }
+
+    public boolean isMailSsl() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (Boolean) mailConfig.getOrDefault("ssl", true);
+        }
+        return true;
+    }
+
+    public int getMailTimeout() {
+        Map<String, Object> mailConfig = getMailConfig();
+        if (mailConfig != null) {
+            return (Integer) mailConfig.getOrDefault("timeout", 30000);
+        }
+        return 30000;
     }
 }

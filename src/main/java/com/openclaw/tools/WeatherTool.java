@@ -1,6 +1,7 @@
 package com.openclaw.tools;
 
-import com.openclaw.config.ConfigManager;
+import com.openclaw.model.entity.ToolParameters;
+import com.openclaw.model.entity.ToolResult;
 
 /**
  * 天气查询工具
