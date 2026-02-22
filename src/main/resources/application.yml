@@ -1,0 +1,57 @@
+# OpenClaw配置文件
+openclaw:
+  # 记忆模式配置
+  memory:
+    enabled: true
+    storage:
+      directory: ./memory
+      file_format: markdown
+    # 日志配置
+    logs:
+      enabled: true
+      daily_log:
+        enabled: true
+        cron_expression: "0 0 22 * * ?"  # 每天22:00执行
+        archive_days: 90  # 日志归档天数
+        clean_days: 180  # 日志清理天数
+      weekly_report:
+        enabled: true
+        cron_expression: "0 0 22 ? * 6"  # 每周六22:00执行
+      monthly_report:
+        enabled: true
+        cron_expression: "0 0 22 1 * ?"  # 每月1日22:00执行
+    # SQLite配置
+    sqlite:
+      enabled: true
+      db_path: ./memory/openclaw.db
+      optimize_interval: 24  # 数据库优化间隔（小时）
+    # 搜索配置
+    search:
+      enabled: true
+      vector_weight: 0.7  # 向量搜索权重
+      text_weight: 0.3   # 文本搜索权重
+      default_max_results: 10  # 默认最大结果数
+      default_min_score: 0.1   # 默认最小评分
+  # 大模型配置
+  llm:
+    provider: glm
+    model: glm-4.7
+    api_key: YOUR_API_KEY
+    api_url: https://open.bigmodel.cn/api/paas/v4/chat/completions
+    timeout: 30000
+  # 控制台配置
+  console:
+    prompt: "OpenClaw> "
+    welcome_message: "欢迎使用OpenClaw记忆模式！输入您的问题，或输入 'help' 查看可用命令，输入 'exit' 退出程序。"
+    error_message: "抱歉，处理您的请求时出现错误。"
+  # 文件索引配置
+  file_indexer:
+    enabled: true
+    chunk_size: 1600  # 分块大小（字符）
+    overlap_size: 80   # 重叠大小（字符）
+    watch_enabled: true  # 是否启用文件监控
+  # 长期记忆配置
+  long_term_memory:
+    enabled: true
+    prompt:
+      analysis: "请分析以下对话内容，判断哪些信息需要写入长期记忆，以及应该写入到哪个文件中。\n\n对话内容:\n{conversation_summary}\n\n分析要求:\n1. 识别对话中是否包含重要决策、偏好、关键事实等需要长期记忆的信息\n2. 对于需要长期记忆的信息，判断应该写入到哪个文件:\n   - MEMORY.md: 重要决策、偏好、关键事实、项目信息\n   - USER.md: 用户画像、偏好语言、工作习惯、专业背景、兴趣爱好\n   - SOUL.md: AI人格与行为规则、性格、语气、做事风格\n3. 对于每条需要长期记忆的信息，提供简洁的总结\n4. 输出格式为JSON数组，每个元素包含以下字段:\n   - content: 需要记忆的内容（字符串）\n   - file: 目标文件（MEMORY.md、USER.md或SOUL.md）\n   - reason: 为什么需要记忆这条信息（字符串）\n\n如果没有需要长期记忆的信息，请输出空数组 []。\n\n重要提示：你必须只返回纯JSON，不要包含任何Markdown标记、说明文字或其他格式。整个响应必须是一个有效的JSON数组。"
