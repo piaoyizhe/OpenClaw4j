@@ -173,18 +173,7 @@ public class ConfigManager {
         return (Boolean) fileIndexerConfig.get("watch_enabled");
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, Object> getLongTermMemoryConfig() {
-        Map<String, Object> openclawConfig = getOpenClawConfig();
-        return (Map<String, Object>) openclawConfig.get("long_term_memory");
-    }
 
-    @SuppressWarnings("unchecked")
-    public String getLongTermMemoryAnalysisPrompt() {
-        Map<String, Object> longTermMemoryConfig = getLongTermMemoryConfig();
-        Map<String, Object> promptConfig = (Map<String, Object>) longTermMemoryConfig.get("prompt");
-        return (String) promptConfig.get("analysis");
-    }
     
     @SuppressWarnings("unchecked")
     public Map<String, Object> getToolsConfig() {

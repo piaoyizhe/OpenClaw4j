@@ -50,8 +50,3 @@ openclaw:
     chunk_size: 1600  # 分块大小（字符）
     overlap_size: 80   # 重叠大小（字符）
     watch_enabled: true  # 是否启用文件监控
-  # 长期记忆配置
-  long_term_memory:
-    enabled: true
-    prompt:
-      analysis: "请分析以下对话内容，判断哪些信息需要写入长期记忆，以及应该写入到哪个文件中。\n\n对话内容:\n{conversation_summary}\n\n分析要求:\n1. 识别对话中是否包含重要决策、偏好、关键事实等需要长期记忆的信息\n2. 对于需要长期记忆的信息，判断应该写入到哪个文件:\n   - MEMORY.md: 重要决策、偏好、关键事实、项目信息\n   - USER.md: 用户画像、偏好语言、工作习惯、专业背景、兴趣爱好\n   - SOUL.md: AI人格与行为规则、性格、语气、做事风格\n3. 对于每条需要长期记忆的信息，提供简洁的总结\n4. 输出格式为JSON数组，每个元素包含以下字段:\n   - content: 需要记忆的内容（字符串）\n   - file: 目标文件（MEMORY.md、USER.md或SOUL.md）\n   - reason: 为什么需要记忆这条信息（字符串）\n\n如果没有需要长期记忆的信息，请输出空数组 []。\n\n重要提示：你必须只返回纯JSON，不要包含任何Markdown标记、说明文字或其他格式。整个响应必须是一个有效的JSON数组。"
