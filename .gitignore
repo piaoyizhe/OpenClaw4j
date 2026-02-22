@@ -47,8 +47,8 @@ logs
 .env.production.local
 
 # Configuration
-application.yml
 *.yml
+!src/main/resources/application.yml
 
 # Editor directories and files
 .vscode/*
