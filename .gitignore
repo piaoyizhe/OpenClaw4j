@@ -46,6 +46,10 @@ logs
 .env.test.local
 .env.production.local
 
+# Configuration
+application.yml
+*.yml
+
 # Editor directories and files
 .vscode/*
 !.vscode/settings.json
