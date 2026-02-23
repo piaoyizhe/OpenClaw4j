@@ -3,6 +3,7 @@ package com.openclaw.brain;
 import com.openclaw.model.manager.MemoryManager;
 import com.openclaw.model.manager.LongTermMemoryManager;
 import com.openclaw.model.service.MemorySearch;
+import com.openclaw.tools.ToolManagerRegistry;
 import com.openclaw.utils.*;
 
 import com.alibaba.fastjson.JSONArray;
@@ -30,6 +31,7 @@ public class Prefrontal {
     private LongTermMemoryManager longTermMemoryManager;
     private LLMClient llmClient;
     private TaskExecutor taskExecutor;
+    private WorkflowManager workflowManager;
     private AtomicInteger taskIdGenerator;
     private List<JSONObject> chatHistory; // 聊天历史记录（使用官方Message格式）
 
@@ -134,6 +136,7 @@ public class Prefrontal {
         this.longTermMemoryManager = context.getComponent(LongTermMemoryManager.class);
         this.llmClient = context.getComponent(LLMClient.class);
         this.taskExecutor = new TaskExecutor(memoryManager);
+        this.workflowManager = WorkflowManager.getInstance();
         this.taskIdGenerator = new AtomicInteger(1);
         this.chatHistory = new ArrayList<>(); // 初始化聊天历史记录（使用官方Message格式）
 
@@ -196,8 +199,12 @@ public class Prefrontal {
             // 添加用户查询到聊天历史记录
             addToChatHistory("用户", query);
 
-            // 直接使用大模型的工具调用功能
-            String response = generateResponseWithToolCalls(query);
+            // 意图识别和工作流程管理
+            WorkflowManager.IntentRecognitionResult intentResult = workflowManager.recognizeIntent(query);
+            System.out.println("意图识别结果: 意图=" + intentResult.getIntent() + ", 任务类型=" + intentResult.getTaskType() + ", 工作流程=" + intentResult.getWorkflowName());
+
+            // 使用大模型的工具调用功能
+            String response = generateResponseWithToolCalls(query, intentResult);
 
             // 添加系统响应到聊天历史记录
             addToChatHistory("助手", response);
@@ -218,13 +225,13 @@ public class Prefrontal {
      * 使用大模型的工具调用功能生成响应
      *
      * @param query 用户查询内容
+     * @param intentResult 意图识别结果
      * @return 处理结果
      */
-    private String generateResponseWithToolCalls(String query) throws Exception {
-        // 获取ToolManagerRegistry实例，加载所有工具管理器的工具信息
-        com.openclaw.tools.ToolManagerRegistry toolRegistry = com.openclaw.tools.ToolManagerRegistry.getInstance();
-        JSONArray tools = toolRegistry.getToolsInfoAsJsonArray();
-
+    private String generateResponseWithToolCalls(String query, WorkflowManager.IntentRecognitionResult intentResult) throws Exception {
+        // 获取ToolManagerRegistry实例
+        ToolManagerRegistry toolRegistry = ToolManagerRegistry.getInstance();
+        JSONArray tools = null;
         // 构建消息列表，包含系统提示、最近的聊天历史和当前查询
         List<JSONObject> messages = new ArrayList<>();
 
@@ -234,8 +241,8 @@ public class Prefrontal {
         String identityContent = longTermMemoryManager.readLongTermMemory("IDENTITY.md", true);
 
         // 添加系统消息（包含记忆文件内容）
+        StringBuilder systemPrompt = new StringBuilder();
         if (!soulContent.isEmpty() || !userContent.isEmpty() || !identityContent.isEmpty()) {
-            StringBuilder systemPrompt = new StringBuilder();
             if (!identityContent.isEmpty()) {
                 systemPrompt.append("# AI身份信息\n").append(identityContent).append("\n\n");
             }
@@ -245,15 +252,31 @@ public class Prefrontal {
             if (!userContent.isEmpty()) {
                 systemPrompt.append("# 用户信息\n").append(userContent).append("\n\n");
             }
-            systemPrompt.append("# 当前时间\n").append(DateUtils.getString()).append("\n\n");
-
-            systemPrompt.append("你如果有疑问的地方或者用户描述的不够准确的地方你可以进行提出问题，直到满足你想要了解的所有内容为止").append("\n\n");
-
-            JSONObject systemMsg = new JSONObject();
-            systemMsg.put("role", "system");
-            systemMsg.put("content", systemPrompt.toString());
-            messages.add(systemMsg);
         }
+        systemPrompt.append("# 当前时间\n").append(DateUtils.getString()).append("\n\n");
+
+        // 添加意图识别结果和工作流程信息
+        if (intentResult != null) {
+            systemPrompt.append("# 意图识别结果\n");
+            systemPrompt.append("意图: " + intentResult.getIntent() + "\n");
+            systemPrompt.append("任务类型: " + intentResult.getTaskType() + "\n");
+            systemPrompt.append("工作流程: " + intentResult.getWorkflowName() + "\n");
+            systemPrompt.append("所需工具: " + String.join(", ", intentResult.getToolList()) + "\n");
+            systemPrompt.append("\n");
+        }
+
+        // 如果有推荐的工作流程，添加完整的工作流程内容
+        if (intentResult != null && intentResult.getWorkflowName() != null && !intentResult.getWorkflowName().equals("general_manual")) {
+            String workflowContent = workflowManager.getWorkflowContent(intentResult.getWorkflowName());
+            if (!workflowContent.isEmpty()) {
+                systemPrompt.append("# 工作流程详细内容\n").append(workflowContent).append("\n\n");
+            }
+        }
+
+        JSONObject systemMsg = new JSONObject();
+        systemMsg.put("role", "system");
+        systemMsg.put("content", systemPrompt.toString());
+        messages.add(systemMsg);
 
         // 添加最近的聊天历史（最多10条）
         if (!chatHistory.isEmpty()) {
@@ -271,21 +294,25 @@ public class Prefrontal {
         LLMClient.ModelParams params = new LLMClient.ModelParams();
         params.temperature = 0.7;
 
-        // 获取完整的message对象
+        // 根据意图识别结果过滤工具
+        if (intentResult != null && !intentResult.getToolList().isEmpty()) {
+            // 过滤工具，只保留工作流程中指定的工具
+            tools = filterToolsByNames(toolRegistry.getToolsInfoAsMap(), intentResult.getToolList());
+        } else {
+            // 如果没有指定工具，使用所有工具
+            tools = toolRegistry.getToolsInfoAsJsonArray();
+        }
+
+        // 调用大模型生成最终响应
         JSONObject messageResponse = llmClient.generateCompleteResponse(messages, params, tools);
 
         // 循环处理工具调用
         while (true) {
             // 检查是否有tool_calls
             if (messageResponse.containsKey("tool_calls") && messageResponse.get("tool_calls") != null) {
-                    // 检查是否有content直接返回
-//                if (messageResponse.has("content") && !messageResponse.isNull("content") && !"".equals(messageResponse.getString("content"))) {
-//                    System.out.println("工具助手回复：" + messageResponse.getString("content"));
-//                }
+                JSONArray toolCalls = messageResponse.getJSONArray("tool_calls");
 
-                    JSONArray toolCalls = messageResponse.getJSONArray("tool_calls");
-
-                    if (toolCalls != null && toolCalls.size() > 0) {
+                if (toolCalls != null && toolCalls.size() > 0) {
                     // 添加助手消息（包含tool_calls）
                     JSONObject toolCallMessage = new JSONObject();
                     toolCallMessage.put("role", "assistant");
@@ -339,6 +366,26 @@ public class Prefrontal {
             // 如果没有content和tool_calls，返回默认响应
             return "处理完成，但没有返回内容。";
         }
+    }
+
+
+
+    /**
+     * 根据工具名称过滤工具列表
+     * @param allTools 所有工具
+     * @param requiredToolNames 需要的工具名称列表
+     * @return 过滤后的工具列表
+     */
+    private JSONArray filterToolsByNames(Map<String,JSONObject> allTools, List<String> requiredToolNames) {
+        JSONArray filteredTools = new JSONArray();
+        try {
+            for (String toolName:requiredToolNames) {
+                filteredTools.add(allTools.get(toolName));
+            }
+        } catch (Exception e) {
+            System.err.println("过滤工具失败: " + e.getMessage());
+        }
+        return filteredTools;
     }
 
     /**

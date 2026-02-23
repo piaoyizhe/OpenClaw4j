@@ -39,6 +39,6 @@ public class ShellToolManager extends AbstractToolManager {
             }
         });
 
-        System.out.println("ShellToolManager初始化完成，注册了 " + toolRegistry.size() + " 个工具");
+//        System.out.println("ShellToolManager初始化完成，注册了 " + toolRegistry.size() + " 个工具");
     }
 }

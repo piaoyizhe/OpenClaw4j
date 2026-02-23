@@ -196,7 +196,7 @@ public class FileToolManager extends AbstractToolManager {
             }
         });
 
-        System.out.println("FileToolManager初始化完成，注册了 " + toolRegistry.size() + " 个工具");
+//        System.out.println("FileToolManager初始化完成，注册了 " + toolRegistry.size() + " 个工具");
     }
 
     /**

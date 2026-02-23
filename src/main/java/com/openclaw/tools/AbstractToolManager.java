@@ -55,6 +55,7 @@ public abstract class AbstractToolManager implements ToolManager {
     @Override
     public void registerTool(String name, String description, Map<String, String> parameters, ToolInfo.ToolCaller caller) {
         ToolInfo toolInfo = new ToolInfo(name, description, parameters, caller);
+        System.out.println("- "+name+"："+description);
         toolRegistry.put(name, toolInfo);
     }
 

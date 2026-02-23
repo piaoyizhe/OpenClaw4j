@@ -59,21 +59,6 @@ public class SystemToolManager extends AbstractToolManager {
             }
         });
 
-        // 注册回复用户工具
-        Map<String, String> replyParams = new ConcurrentHashMap<>();
-        replyParams.put("content", "回复内容");
-        registerTool("reply_user", "回复用户消息", replyParams, (ToolInfo.ToolCaller) parameters -> {
-            try {
-                String content = (String) parameters.get("content");
-                if (content == null || content.isEmpty()) {
-                    return "回复内容不能为空。";
-                }
-                return content;
-            } catch (Exception e) {
-                return "回复用户失败: " + e.getMessage();
-            }
-        });
-
         // 注册写日报工具
         Map<String, String> writeDailyParams = new ConcurrentHashMap<>();
         writeDailyParams.put("content", "日报内容");
@@ -156,7 +141,7 @@ public class SystemToolManager extends AbstractToolManager {
             }
         });
 
-        System.out.println("SystemToolManager初始化完成，注册了 " + toolRegistry.size() + " 个工具");
+//        System.out.println("SystemToolManager初始化完成，注册了 " + toolRegistry.size() + " 个工具");
     }
 
     /**
