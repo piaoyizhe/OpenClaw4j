@@ -1,9 +1,9 @@
-package com.openclaw.tools;
+package com.openclaw.utils;
 
 import com.openclaw.model.entity.ToolParameters;
 import com.openclaw.model.entity.ToolResult;
 import okhttp3.*;
-import org.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -12,14 +12,14 @@ import java.util.concurrent.TimeUnit;
  * HTTP工具类
  * 用于发送HTTP请求
  */
-public class HttpTool implements SystemTool {
-    private static HttpTool instance;
+public class HttpUtil {
+    private static HttpUtil instance;
     private OkHttpClient client;
 
     /**
      * 私有构造方法
      */
-    private HttpTool() {
+    private HttpUtil() {
         this.client = new OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
@@ -29,13 +29,13 @@ public class HttpTool implements SystemTool {
 
     /**
      * 获取单例实例
-     * @return HttpTool实例
+     * @return HttpUtil实例
      */
-    public static HttpTool getInstance() {
+    public static HttpUtil getInstance() {
         if (instance == null) {
-            synchronized (HttpTool.class) {
+            synchronized (HttpUtil.class) {
                 if (instance == null) {
-                    instance = new HttpTool();
+                    instance = new HttpUtil();
                 }
             }
         }
@@ -47,7 +47,6 @@ public class HttpTool implements SystemTool {
      * @param parameters 参数
      * @return 执行结果
      */
-    @Override
     public ToolResult execute(ToolParameters parameters) {
         String url = parameters.getString("url");
         if (url == null || url.isEmpty()) {
@@ -80,7 +79,7 @@ public class HttpTool implements SystemTool {
             String headersStr = parameters.getString("headers");
             if (headersStr != null && !headersStr.isEmpty()) {
                 try {
-                    JSONObject headersJson = new JSONObject(headersStr);
+                    JSONObject headersJson = JSONObject.parseObject(headersStr);
                     for (String key : headersJson.keySet()) {
                         requestBuilder.addHeader(key, headersJson.getString(key));
                     }
@@ -140,7 +139,7 @@ public class HttpTool implements SystemTool {
         params.setParameter("url", url);
         params.setParameter("method", "GET");
         if (headers != null && !headers.isEmpty()) {
-            params.setParameter("headers", new JSONObject(headers).toString());
+            params.setParameter("headers", com.alibaba.fastjson.JSONObject.toJSONString(headers));
         }
         params.setParameter("timeout", String.valueOf(timeout));
         ToolResult result = execute(params);
@@ -161,7 +160,7 @@ public class HttpTool implements SystemTool {
         params.setParameter("method", "POST");
         params.setParameter("body", body);
         if (headers != null && !headers.isEmpty()) {
-            params.setParameter("headers", new JSONObject(headers).toString());
+            params.setParameter("headers", com.alibaba.fastjson.JSONObject.toJSONString(headers));
         }
         params.setParameter("timeout", String.valueOf(timeout));
         ToolResult result = execute(params);
@@ -172,26 +171,7 @@ public class HttpTool implements SystemTool {
      * 检查工具是否可用
      * @return 是否可用
      */
-    @Override
     public boolean isAvailable() {
         return true; // HTTP工具在大多数系统上都可用
-    }
-
-    /**
-     * 获取工具名称
-     * @return 工具名称
-     */
-    @Override
-    public String getName() {
-        return "send_http_request";
-    }
-
-    /**
-     * 获取工具描述
-     * @return 工具描述
-     */
-    @Override
-    public String getDescription() {
-        return "发送HTTP请求";
     }
 }

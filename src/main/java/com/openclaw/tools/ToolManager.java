@@ -47,7 +47,7 @@ public interface ToolManager {
      * 获取工具信息的JSONArray格式
      * @return JSONArray格式的工具信息
      */
-    org.json.JSONArray getToolsInfoAsJsonArray();
+    com.alibaba.fastjson.JSONArray getToolsInfoAsJsonArray();
 
     /**
      * 调用工具

@@ -1,7 +1,7 @@
 package com.openclaw.tools;
 
 import com.openclaw.model.entity.ToolInfo;
-import org.json.JSONArray;
+import com.alibaba.fastjson.JSONArray;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,6 +49,8 @@ public class ToolManagerRegistry {
         registerToolManager(new MemoryToolManager());
         registerToolManager(new NetworkToolManager());
         registerToolManager(new WeatherToolManager());
+        registerToolManager(new HttpToolManager());
+        registerToolManager(new ShellToolManager());
     }
 
     /**
@@ -173,8 +175,8 @@ public class ToolManagerRegistry {
         JSONArray toolsArray = new JSONArray();
         for (ToolManager toolManager : toolManagers.values()) {
             JSONArray managerTools = toolManager.getToolsInfoAsJsonArray();
-            for (int i = 0; i < managerTools.length(); i++) {
-                toolsArray.put(managerTools.get(i));
+            for (int i = 0; i < managerTools.size(); i++) {
+                toolsArray.add(managerTools.get(i));
             }
         }
         return toolsArray;

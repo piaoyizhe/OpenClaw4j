@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.openclaw.model.entity.ToolInfo;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * 工具管理器抽象类
@@ -109,20 +109,20 @@ public abstract class AbstractToolManager implements ToolManager {
                 
                 // 检查参数是否为必填（如果描述中不包含"可选"，则视为必填）
                 if (paramDesc == null || !paramDesc.contains("可选")) {
-                    requiredArray.put(paramName);
+                    requiredArray.add(paramName);
                 }
             }
             
             paramsObj.put("type", "object");
             paramsObj.put("properties", propertiesObj);
-            if (requiredArray.length() > 0) {
+            if (requiredArray.size() > 0) {
                 paramsObj.put("required", requiredArray);
             }
             
             functionObj.put("parameters", paramsObj);
             toolObj.put("function", functionObj);
             
-            toolsArray.put(toolObj);
+            toolsArray.add(toolObj);
         }
         
         return toolsArray;

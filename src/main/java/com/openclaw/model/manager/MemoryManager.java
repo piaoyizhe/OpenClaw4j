@@ -491,7 +491,7 @@ public class MemoryManager {
                 boolean success = false;
                 if ("按行更新".equals(updateAnalysis.updateScope)) {
                     // 按行更新或需要确认的情况
-                    if (updateAnalysis.lineUpdates != null && updateAnalysis.lineUpdates.length() > 0) {
+                    if (updateAnalysis.lineUpdates != null && updateAnalysis.lineUpdates.size() > 0) {
                         // 执行按行更新
                         String updatedContent = performLineBasedUpdate(existingContent, updateAnalysis.lineUpdates);
                         if (updatedContent != null) {
@@ -715,7 +715,7 @@ public class MemoryManager {
      * @param lineUpdates     行更新信息数组
      * @return 更新后的内容
      */
-    private String performLineBasedUpdate(String existingContent, org.json.JSONArray lineUpdates) {
+    private String performLineBasedUpdate(String existingContent, com.alibaba.fastjson.JSONArray lineUpdates) {
         // 如果现有内容为空，直接返回空字符串
         if (existingContent == null || existingContent.isEmpty()) {
             return "";
@@ -726,12 +726,12 @@ public class MemoryManager {
         java.util.List<String> lineList = new java.util.ArrayList<>(java.util.Arrays.asList(lines));
 
         // 处理每行更新
-        for (int i = 0; i < lineUpdates.length(); i++) {
+        for (int i = 0; i < lineUpdates.size(); i++) {
             try {
-                org.json.JSONObject lineUpdate = lineUpdates.getJSONObject(i);
-                int lineNumber = lineUpdate.optInt("lineNumber", 0);
-                String content = lineUpdate.optString("content", "");
-                String operation = lineUpdate.optString("operation", "update");
+                com.alibaba.fastjson.JSONObject lineUpdate = lineUpdates.getJSONObject(i);
+                int lineNumber = lineUpdate.getIntValue("lineNumber");
+                String content = lineUpdate.getString("content") != null ? lineUpdate.getString("content") : "";
+                String operation = lineUpdate.getString("operation") != null ? lineUpdate.getString("operation") : "update";
 
                 if (lineNumber > 0) {
                     if ("update".equals(operation)) {

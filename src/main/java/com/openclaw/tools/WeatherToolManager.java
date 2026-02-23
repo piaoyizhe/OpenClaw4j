@@ -3,6 +3,7 @@ package com.openclaw.tools;
 import com.openclaw.model.entity.ToolInfo;
 import com.openclaw.model.entity.ToolParameters;
 import com.openclaw.model.entity.ToolResult;
+import com.openclaw.utils.WeatherUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,11 +50,11 @@ public class WeatherToolManager extends AbstractToolManager {
      * @return 天气信息
      */
     private String getWeather(String city) throws Exception {
-        // 使用WeatherTool获取天气信息
-        WeatherTool weatherTool = new WeatherTool();
+        // 使用WeatherUtil获取天气信息
+        WeatherUtil weatherUtil = WeatherUtil.getInstance();
         ToolParameters params = new ToolParameters();
         params.setParameter("city", city);
-        ToolResult result = weatherTool.execute(params);
+        ToolResult result = weatherUtil.execute(params);
         // 返回具体的天气信息，而不仅仅是成功消息
         if (result.getData() != null) {
             return result.getData().toString();

@@ -4,8 +4,8 @@ import com.openclaw.config.ConfigManager;
 import com.openclaw.utils.OpenClawException;
 
 import okhttp3.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class LLMClient {
      */
     public static class ModelParams {
         public double temperature = 0.7;    // 温度参数
-        public int maxTokens = 1024;         // 最大令牌数
+        public int maxTokens = 131072;         // 最大令牌数
         public boolean thinking = false; // 思考模式
         public boolean stream = false; // 流式输出
         public String responseFormat = "text"; // text表示普通文本输出，json_object表示JSON格式输出
@@ -220,7 +220,7 @@ public class LLMClient {
 
             // 添加用户提供的消息
             for (JSONObject message : messages) {
-                messagesArray.put(message);
+                messagesArray.add(message);
             }
 
             requestBody.put("messages", messagesArray);
@@ -228,7 +228,7 @@ public class LLMClient {
             requestBody.put("max_tokens", finalParams.maxTokens);
             
             // 添加工具信息
-            if (tools != null && tools.length() > 0) {
+            if (tools != null && tools.size() > 0) {
                 requestBody.put("tools", tools);
             }
 
@@ -253,10 +253,10 @@ public class LLMClient {
 
                 // 解析响应
                 String responseBody = response.body().string();
-                JSONObject jsonResponse = new JSONObject(responseBody);
+                JSONObject jsonResponse = JSONObject.parseObject(responseBody);
 
                 JSONArray choices = jsonResponse.getJSONArray("choices");
-                if (choices.length() > 0) {
+                if (choices.size() > 0) {
                     JSONObject choice = choices.getJSONObject(0);
                     JSONObject messageResponse = choice.getJSONObject("message");
                     return messageResponse;
@@ -358,14 +358,14 @@ public class LLMClient {
             if (requestParams.messages != null && !requestParams.messages.isEmpty()) {
                 // 使用官方Message格式
                 for (JSONObject message : requestParams.messages) {
-                    messagesArray.put(message);
+                    messagesArray.add(message);
                 }
             } else if (requestParams.prompt != null) {
                 // 使用传统格式，构建用户消息
                 JSONObject userMsg = new JSONObject();
                 userMsg.put("role", "user");
                 userMsg.put("content", requestParams.prompt);
-                messagesArray.put(userMsg);
+                messagesArray.add(userMsg);
             } else {
                 throw new Exception("提示词或消息列表不能为空");
             }
@@ -375,7 +375,7 @@ public class LLMClient {
             requestBody.put("max_tokens", finalParams.maxTokens);
             
             // 添加工具信息
-            if (requestParams.tools != null && requestParams.tools.length() > 0) {
+            if (requestParams.tools != null && requestParams.tools.size() > 0) {
                 requestBody.put("tools", requestParams.tools);
             }
 
@@ -400,19 +400,19 @@ public class LLMClient {
 
                 // 解析响应
                 String responseBody = response.body().string();
-                JSONObject jsonResponse = new JSONObject(responseBody);
+                JSONObject jsonResponse = JSONObject.parseObject(responseBody);
 
                 JSONArray choices = jsonResponse.getJSONArray("choices");
-                if (choices.length() > 0) {
+                if (choices.size() > 0) {
                     JSONObject choice = choices.getJSONObject(0);
                     JSONObject messageResponse = choice.getJSONObject("message");
                     
                     // 检查是否有tool_calls
-                    if (messageResponse.has("tool_calls")) {
+                    if (messageResponse.containsKey("tool_calls")) {
                         JSONArray toolCalls = messageResponse.getJSONArray("tool_calls");
                         // 返回原始的tool_calls数据作为JSON字符串
-                        return toolCalls.toString();
-                    } else if (messageResponse.has("content")) {
+                        return toolCalls.toJSONString();
+                    } else if (messageResponse.containsKey("content")) {
                         // 普通回复
                         String content = messageResponse.getString("content");
                         return content;
@@ -447,61 +447,61 @@ public class LLMClient {
             RequestParams requestParams = new RequestParams();
             
             // 提取基本参数
-            if (paramsJsonObject.has("prompt")) {
+            if (paramsJsonObject.containsKey("prompt")) {
                 requestParams.prompt = paramsJsonObject.getString("prompt");
             }
-            if (paramsJsonObject.has("currentUserName")) {
+            if (paramsJsonObject.containsKey("currentUserName")) {
                 requestParams.currentUserName = paramsJsonObject.getString("currentUserName");
             }
-            if (paramsJsonObject.has("requireJson")) {
+            if (paramsJsonObject.containsKey("requireJson")) {
                 requestParams.requireJson = paramsJsonObject.getBoolean("requireJson");
             }
             
             // 提取历史记录
-            if (paramsJsonObject.has("historyRecords")) {
+            if (paramsJsonObject.containsKey("historyRecords")) {
                 JSONArray historyArray = paramsJsonObject.getJSONArray("historyRecords");
                 List<String> historyRecords = new ArrayList<>();
-                for (int i = 0; i < historyArray.length(); i++) {
+                for (int i = 0; i < historyArray.size(); i++) {
                     historyRecords.add(historyArray.getString(i));
                 }
                 requestParams.historyRecords = historyRecords;
             }
             
             // 提取模型参数
-            if (paramsJsonObject.has("modelParams")) {
+            if (paramsJsonObject.containsKey("modelParams")) {
                 JSONObject modelParamsJson = paramsJsonObject.getJSONObject("modelParams");
                 ModelParams modelParams = new ModelParams();
-                if (modelParamsJson.has("temperature")) {
+                if (modelParamsJson.containsKey("temperature")) {
                     modelParams.temperature = modelParamsJson.getDouble("temperature");
                 }
-                if (modelParamsJson.has("maxTokens")) {
-                    modelParams.maxTokens = modelParamsJson.getInt("maxTokens");
+                if (modelParamsJson.containsKey("maxTokens")) {
+                    modelParams.maxTokens = modelParamsJson.getIntValue("maxTokens");
                 }
-                if (modelParamsJson.has("thinking")) {
+                if (modelParamsJson.containsKey("thinking")) {
                     modelParams.thinking = modelParamsJson.getBoolean("thinking");
                 }
-                if (modelParamsJson.has("stream")) {
+                if (modelParamsJson.containsKey("stream")) {
                     modelParams.stream = modelParamsJson.getBoolean("stream");
                 }
-                if (modelParamsJson.has("responseFormat")) {
+                if (modelParamsJson.containsKey("responseFormat")) {
                     modelParams.responseFormat = modelParamsJson.getString("responseFormat");
                 }
-                if (modelParamsJson.has("model")) {
+                if (modelParamsJson.containsKey("model")) {
                     modelParams.model = modelParamsJson.getString("model");
                 }
                 requestParams.modelParams = modelParams;
             }
             
             // 提取工具信息
-            if (paramsJsonObject.has("tools")) {
+            if (paramsJsonObject.containsKey("tools")) {
                 requestParams.tools = paramsJsonObject.getJSONArray("tools");
             }
             
             // 提取消息列表
-            if (paramsJsonObject.has("messages")) {
+            if (paramsJsonObject.containsKey("messages")) {
                 JSONArray messagesArray = paramsJsonObject.getJSONArray("messages");
                 List<JSONObject> messages = new ArrayList<>();
-                for (int i = 0; i < messagesArray.length(); i++) {
+                for (int i = 0; i < messagesArray.size(); i++) {
                     messages.add(messagesArray.getJSONObject(i));
                 }
                 requestParams.messages = messages;
@@ -640,10 +640,10 @@ public class LLMClient {
             JSONObject textContent = new JSONObject();
             textContent.put("type", "text");
             textContent.put("text", text);
-            content.put(textContent);
+            content.add(textContent);
             
             message.put("content", content);
-            messages.put(message);
+            messages.add(message);
             requestBody.put("messages", messages);
             
             // 构建请求
@@ -665,11 +665,11 @@ public class LLMClient {
                 
                 // 解析响应
                 String responseBody = response.body().string();
-                JSONObject jsonResponse = new JSONObject(responseBody);
+                JSONObject jsonResponse = JSONObject.parseObject(responseBody);
                 
                 // 获取usage字段中的total_tokens
                 JSONObject usage = jsonResponse.getJSONObject("usage");
-                int totalTokens = usage.getInt("total_tokens");
+                int totalTokens = usage.getIntValue("total_tokens");
                 
                 return totalTokens;
             } catch (IOException e) {

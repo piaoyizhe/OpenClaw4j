@@ -36,7 +36,7 @@ openclaw:
   llm:
     provider: glm
     model: glm-4.7
-    api_key: YOUR_API_KEY
+    api_key: d0da4f51bb284e5c950c1682a9b1f385.MTqFiIW2yO0uLvkk
     api_url: https://open.bigmodel.cn/api/paas/v4/chat/completions
     timeout: 30000
   # 控制台配置
@@ -55,8 +55,8 @@ openclaw:
     enabled: true
     host: smtp.qq.com
     port: 465
-    username: xxxxxxx@qq.com
-    password: tgpskgbbshqzabcd
-    from: xxxxxxx@qq.com
+    username: 591543227@qq.com
+    password: tgpskgbbshqzbcba
+    from: 591543227@qq.com
     ssl: true
     timeout: 30000

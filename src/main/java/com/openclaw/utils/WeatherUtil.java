@@ -1,4 +1,4 @@
-package com.openclaw.tools;
+package com.openclaw.utils;
 
 import com.openclaw.model.entity.ToolParameters;
 import com.openclaw.model.entity.ToolResult;
@@ -7,19 +7,35 @@ import com.openclaw.model.entity.ToolResult;
  * 天气查询工具
  * （示例实现，需要配置真实的天气API）
  */
-public class WeatherTool implements SystemTool {
-    
-    @Override
-    public String getName() {
-        return "weather";
+public class WeatherUtil {
+    private static WeatherUtil instance;
+
+    /**
+     * 私有构造方法
+     */
+    private WeatherUtil() {
     }
-    
-    @Override
-    public String getDescription() {
-        return "查询指定城市的天气信息";
+
+    /**
+     * 获取单例实例
+     * @return WeatherUtil实例
+     */
+    public static WeatherUtil getInstance() {
+        if (instance == null) {
+            synchronized (WeatherUtil.class) {
+                if (instance == null) {
+                    instance = new WeatherUtil();
+                }
+            }
+        }
+        return instance;
     }
-    
-    @Override
+
+    /**
+     * 执行天气查询
+     * @param parameters 参数
+     * @return 执行结果
+     */
     public ToolResult execute(ToolParameters parameters) {
         long startTime = System.currentTimeMillis();
         
@@ -51,8 +67,11 @@ public class WeatherTool implements SystemTool {
             return result;
         }
     }
-    
-    @Override
+
+    /**
+     * 检查工具是否可用
+     * @return 是否可用
+     */
     public boolean isAvailable() {
         // 即使没有配置API密钥，也返回true以使用模拟数据
         return true;

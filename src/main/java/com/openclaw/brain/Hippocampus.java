@@ -1,8 +1,8 @@
 package com.openclaw.brain;
 
 import com.openclaw.utils.LLMClient;
-import org.json.JSONObject;
-import org.json.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 
 /**
  * AI记忆管理器
@@ -165,14 +165,14 @@ public class Hippocampus {
 
         // 解析JSON响应
         try {
-            JSONObject json = new JSONObject(response);
+            JSONObject json = JSONObject.parseObject(response);
             MemoryAnalysisResult result = new MemoryAnalysisResult();
-            result.targetFile = json.optString("targetFile", "MEMORY.md");
-            result.extractedContent = json.optString("extractedContent", "");
-            result.shouldUpdate = json.optBoolean("shouldUpdate", false);
-            result.reason = json.optString("reason", "");
-            result.hasConflict = json.optBoolean("hasConflict", false);
-            result.conflictDetails = json.optString("conflictDetails", "");
+            result.targetFile = json.getString("targetFile") != null ? json.getString("targetFile") : "MEMORY.md";
+            result.extractedContent = json.getString("extractedContent") != null ? json.getString("extractedContent") : "";
+            result.shouldUpdate = json.getBooleanValue("shouldUpdate");
+            result.reason = json.getString("reason") != null ? json.getString("reason") : "";
+            result.hasConflict = json.getBooleanValue("hasConflict");
+            result.conflictDetails = json.getString("conflictDetails") != null ? json.getString("conflictDetails") : "";
 
             // 确保targetFile格式正确
             if (!result.targetFile.contains(".md")) {
@@ -290,24 +290,24 @@ public class Hippocampus {
 
         // 解析JSON响应
         try {
-            JSONObject json = new JSONObject(response);
+            JSONObject json = JSONObject.parseObject(response);
             MemoryUpdateAnalysis result = new MemoryUpdateAnalysis();
-            result.hasConflict = json.optBoolean("hasConflict", false);
-            result.conflictType = json.optString("conflictType", "");
-            result.needsUpdate = json.optBoolean("needsUpdate", false);
-            result.updateScope = json.optString("updateScope", "无需更新");
-            result.lineUpdates = json.optJSONArray("lineUpdates");
-            result.fileContent = json.optString("fileContent", "");
-            result.uncertainParts = json.optString("uncertainParts", "");
-            result.reason = json.optString("reason", "");
-            result.confirmationRequired = json.optString("confirmationRequired", "");
+            result.hasConflict = json.getBooleanValue("hasConflict");
+            result.conflictType = json.getString("conflictType") != null ? json.getString("conflictType") : "";
+            result.needsUpdate = json.getBooleanValue("needsUpdate");
+            result.updateScope = json.getString("updateScope") != null ? json.getString("updateScope") : "无需更新";
+            result.lineUpdates = json.getJSONArray("lineUpdates");
+            result.fileContent = json.getString("fileContent") != null ? json.getString("fileContent") : "";
+            result.uncertainParts = json.getString("uncertainParts") != null ? json.getString("uncertainParts") : "";
+            result.reason = json.getString("reason") != null ? json.getString("reason") : "";
+            result.confirmationRequired = json.getString("confirmationRequired") != null ? json.getString("confirmationRequired") : "";
 
-            if (result.lineUpdates != null && result.lineUpdates.length() > 0) {
-                for (int i = 0; i < result.lineUpdates.length(); i++) {
+            if (result.lineUpdates != null && result.lineUpdates.size() > 0) {
+                for (int i = 0; i < result.lineUpdates.size(); i++) {
                     JSONObject lineUpdate = result.lineUpdates.getJSONObject(i);
-                    int lineNumber = lineUpdate.optInt("lineNumber", 0);
-                    String content = lineUpdate.optString("content", "");
-                    String operation = lineUpdate.optString("operation", "update");
+                    int lineNumber = lineUpdate.getIntValue("lineNumber");
+                    String content = lineUpdate.getString("content") != null ? lineUpdate.getString("content") : "";
+                    String operation = lineUpdate.getString("operation") != null ? lineUpdate.getString("operation") : "update";
 //                    System.out.println("    - 行" + lineNumber + " (" + operation + "): " + content);
                 }
             }
@@ -391,13 +391,13 @@ public class Hippocampus {
         
         // 解析JSON响应
         try {
-            JSONObject json = new JSONObject(response);
+            JSONObject json = JSONObject.parseObject(response);
             ConflictResolutionResult result = new ConflictResolutionResult();
-            result.hasConflict = json.optBoolean("hasConflict", false);
-            result.conflictType = json.optString("conflictType", "");
-            result.resolutionStrategy = json.optString("resolutionStrategy", "直接覆盖");
-            result.updatedContent = json.optString("updatedContent", newContent);
-            result.reason = json.optString("reason", "");
+            result.hasConflict = json.getBooleanValue("hasConflict");
+            result.conflictType = json.getString("conflictType") != null ? json.getString("conflictType") : "";
+            result.resolutionStrategy = json.getString("resolutionStrategy") != null ? json.getString("resolutionStrategy") : "直接覆盖";
+            result.updatedContent = json.getString("updatedContent") != null ? json.getString("updatedContent") : newContent;
+            result.reason = json.getString("reason") != null ? json.getString("reason") : "";
             
             System.out.println(">>> 存在冲突: " + result.hasConflict);
             if (result.hasConflict) {

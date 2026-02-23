@@ -3,6 +3,8 @@ package com.openclaw.tools;
 import com.openclaw.model.entity.ToolInfo;
 import com.openclaw.model.entity.ToolParameters;
 import com.openclaw.model.entity.ToolResult;
+import com.openclaw.utils.HttpUtil;
+import com.openclaw.utils.ShellUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,9 +36,9 @@ public class NetworkToolManager extends AbstractToolManager {
         httpParams.put("timeout", "请求超时时间（毫秒），可选");
         registerTool("send_http_request", "发送HTTP请求", httpParams, (ToolInfo.ToolCaller) parameters -> {
             try {
-                HttpTool httpTool = HttpTool.getInstance();
+                HttpUtil httpUtil = HttpUtil.getInstance();
                 ToolParameters params = new ToolParameters(parameters);
-                ToolResult result = httpTool.execute(params);
+                ToolResult result = httpUtil.execute(params);
                 return result.getMessage();
             } catch (Exception e) {
                 return "发送HTTP请求失败: " + e.getMessage();
@@ -49,9 +51,9 @@ public class NetworkToolManager extends AbstractToolManager {
         shellParams.put("timeout", "执行超时时间（毫秒），可选");
         registerTool("execute_shell", "执行Shell命令", shellParams, (ToolInfo.ToolCaller) parameters -> {
             try {
-                ShellTool shellTool = ShellTool.getInstance();
+                ShellUtil shellUtil = ShellUtil.getInstance();
                 ToolParameters params = new ToolParameters(parameters);
-                ToolResult result = shellTool.execute(params);
+                ToolResult result = shellUtil.execute(params);
                 return result.getMessage();
             } catch (Exception e) {
                 return "执行Shell命令失败: " + e.getMessage();

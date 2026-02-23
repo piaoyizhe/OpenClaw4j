@@ -5,8 +5,8 @@ import com.openclaw.model.manager.LongTermMemoryManager;
 import com.openclaw.model.service.MemorySearch;
 import com.openclaw.utils.*;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.sqlite.util.StringUtils;
 
 import java.io.IOException;
@@ -277,7 +277,7 @@ public class Prefrontal {
         // 循环处理工具调用
         while (true) {
             // 检查是否有tool_calls
-                if (messageResponse.has("tool_calls") && !messageResponse.isNull("tool_calls")) {
+            if (messageResponse.containsKey("tool_calls") && messageResponse.get("tool_calls") != null) {
                     // 检查是否有content直接返回
 //                if (messageResponse.has("content") && !messageResponse.isNull("content") && !"".equals(messageResponse.getString("content"))) {
 //                    System.out.println("工具助手回复：" + messageResponse.getString("content"));
@@ -285,7 +285,7 @@ public class Prefrontal {
 
                     JSONArray toolCalls = messageResponse.getJSONArray("tool_calls");
 
-                    if (toolCalls != null && toolCalls.length() > 0) {
+                    if (toolCalls != null && toolCalls.size() > 0) {
                     // 添加助手消息（包含tool_calls）
                     JSONObject toolCallMessage = new JSONObject();
                     toolCallMessage.put("role", "assistant");
@@ -293,23 +293,23 @@ public class Prefrontal {
                     messages.add(toolCallMessage);
 
                     // 执行所有工具调用
-                    for (int i = 0; i < toolCalls.length(); i++) {
+                    for (int i = 0; i < toolCalls.size(); i++) {
                         JSONObject toolCall = toolCalls.getJSONObject(i);
 
-                        if (toolCall.has("function")) {
+                        if (toolCall.containsKey("function")) {
                             JSONObject function = toolCall.getJSONObject("function");
                             String functionName = function.getString("name");
                             String arguments = function.getString("arguments");
 
                             // 解析arguments
-                            JSONObject argsJson = new JSONObject(arguments);
+                            JSONObject argsJson = JSONObject.parseObject(arguments);
 
                             // 创建任务
                             Task task = new Task(
                                     "task_" + taskIdGenerator.getAndIncrement(),
                                     functionName,
                                     "执行工具调用: " + functionName,
-                                    argsJson.toMap()
+                                    argsJson
                             );
 
                             // 执行任务
@@ -331,7 +331,7 @@ public class Prefrontal {
                 }
             } else {
                 // 检查是否有content直接返回
-                if (messageResponse.has("content") && !messageResponse.isNull("content")) {
+                if (messageResponse.containsKey("content") && messageResponse.get("content") != null) {
                     return messageResponse.getString("content");
                 }
             }

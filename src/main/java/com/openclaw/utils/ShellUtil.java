@@ -1,4 +1,4 @@
-package com.openclaw.tools;
+package com.openclaw.utils;
 
 import com.openclaw.model.entity.ToolParameters;
 import com.openclaw.model.entity.ToolResult;
@@ -12,26 +12,26 @@ import java.util.concurrent.*;
  * Shell工具类
  * 用于执行Shell命令
  */
-public class ShellTool implements SystemTool {
-    private static ShellTool instance;
+public class ShellUtil {
+    private static ShellUtil instance;
     private ExecutorService executorService;
 
     /**
      * 私有构造方法
      */
-    private ShellTool() {
+    private ShellUtil() {
         this.executorService = Executors.newCachedThreadPool();
     }
 
     /**
      * 获取单例实例
-     * @return ShellTool实例
+     * @return ShellUtil实例
      */
-    public static ShellTool getInstance() {
+    public static ShellUtil getInstance() {
         if (instance == null) {
-            synchronized (ShellTool.class) {
+            synchronized (ShellUtil.class) {
                 if (instance == null) {
-                    instance = new ShellTool();
+                    instance = new ShellUtil();
                 }
             }
         }
@@ -43,7 +43,6 @@ public class ShellTool implements SystemTool {
      * @param parameters 参数
      * @return 执行结果
      */
-    @Override
     public ToolResult execute(ToolParameters parameters) {
         String command = parameters.getString("command");
         if (command == null || command.isEmpty()) {
@@ -120,27 +119,8 @@ public class ShellTool implements SystemTool {
      * 检查工具是否可用
      * @return 是否可用
      */
-    @Override
     public boolean isAvailable() {
         return true; // Shell工具在大多数系统上都可用
-    }
-
-    /**
-     * 获取工具名称
-     * @return 工具名称
-     */
-    @Override
-    public String getName() {
-        return "execute_shell";
-    }
-
-    /**
-     * 获取工具描述
-     * @return 工具描述
-     */
-    @Override
-    public String getDescription() {
-        return "执行Shell命令";
     }
 
     /**
