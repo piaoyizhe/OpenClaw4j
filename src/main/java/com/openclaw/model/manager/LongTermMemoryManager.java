@@ -78,17 +78,74 @@ public class LongTermMemoryManager {
      * 初始化长期记忆文件
      */
     private void initializeLongTermMemoryFiles() {
-        // 初始化项目级长期记忆文件
-        createDefaultFile(getProjectMemoryFilePath(MEMORY_FILE), getDefaultMemoryContent());
-//        createDefaultFile(getProjectMemoryFilePath(USER_FILE), getDefaultUserContent());
-        createDefaultFile(getProjectMemoryFilePath(SOUL_FILE), getDefaultSoulContent());
-//        createDefaultFile(getProjectMemoryFilePath(IDENTITY_FILE), getDefaultIdentityContent());
-
-        // 初始化全局级长期记忆文件
+        // 初始化全局级长期记忆文件（始终创建空文件）
         createDefaultFile(getGlobalMemoryFilePath(MEMORY_FILE), "");
         createDefaultFile(getGlobalMemoryFilePath(USER_FILE), "");
         createDefaultFile(getGlobalMemoryFilePath(SOUL_FILE), "");
         createDefaultFile(getGlobalMemoryFilePath(IDENTITY_FILE), "");
+    }
+    
+    /**
+     * 检查是否是首次运行
+     * @return 是否是首次运行
+     */
+    public boolean isFirstRun() {
+        // 检查是否存在核心记忆文件，或者文件内容是否为空
+        return !exists(MEMORY_FILE, true) || !exists(SOUL_FILE, true) || 
+               readLongTermMemory(MEMORY_FILE, true).isEmpty() || 
+               readLongTermMemory(SOUL_FILE, true).isEmpty();
+    }
+    
+    /**
+     * 初始化首次运行的记忆文件
+     */
+    public void initializeFirstRunFiles() {
+        // 初始化项目级长期记忆文件
+        createDefaultFile(getProjectMemoryFilePath(MEMORY_FILE), getDefaultMemoryContent());
+        createDefaultFile(getProjectMemoryFilePath(SOUL_FILE), getDefaultSoulContent());
+        createDefaultFile(getProjectMemoryFilePath(USER_FILE), getDefaultUserContent());
+        createDefaultFile(getProjectMemoryFilePath(IDENTITY_FILE), getDefaultIdentityContent());
+    }
+    
+    /**
+     * 更新数字员工信息
+     * @param name 姓名
+     * @param jobId 工号
+     * @param description 功能简介
+     */
+    public void updateDigitalEmployeeInfo(String name, String jobId, String description) {
+        // 读取当前IDENTITY.md内容
+        String currentContent = readLongTermMemory(IDENTITY_FILE, true);
+        
+        // 如果文件不存在或为空，使用默认内容
+        if (currentContent.isEmpty()) {
+            currentContent = getDefaultIdentityContent();
+        }
+        
+        // 替换姓名
+        if (name != null && !name.isEmpty()) {
+            currentContent = currentContent.replace("(待设置)", name);
+        }
+        
+        // 替换工号
+        if (jobId != null && !jobId.isEmpty()) {
+            currentContent = currentContent.replace("(待设置)", jobId);
+        }
+        
+        // 添加功能简介
+        if (description != null && !description.isEmpty()) {
+            // 检查是否已有功能简介部分
+            if (!currentContent.contains("## 功能简介")) {
+                currentContent += "\n## 功能简介\n" + description + "\n";
+            } else {
+                // 替换现有的功能简介
+                String[] parts = currentContent.split("## 功能简介");
+                currentContent = parts[0] + "## 功能简介\n" + description + "\n" + parts[1].split("##")[1];
+            }
+        }
+        
+        // 写回文件
+        writeLongTermMemory(IDENTITY_FILE, currentContent, true);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.openclaw.console;
 
+import com.openclaw.model.manager.LongTermMemoryManager;
 import com.openclaw.utils.LLMClient;
 import com.openclaw.brain.Prefrontal;
 import com.openclaw.config.ConfigManager;
@@ -39,6 +40,119 @@ public class ConsoleInterface {
         System.out.println(configManager.getWelcomeMessage());
         System.out.println("输入 'help' 查看可用命令");
         System.out.println();
+
+        // 检查是否是首次运行
+        LongTermMemoryManager longTermMemoryManager = LongTermMemoryManager.getInstance();
+        if (longTermMemoryManager.isFirstRun()) {
+            System.out.println("========================================");
+            System.out.println("首次运行引导");
+            System.out.println("========================================");
+            System.out.println("欢迎使用OpenClaw！这是您第一次运行应用程序。");
+            System.out.println("请完成以下配置，以便系统更好地为您服务。");
+            System.out.println();
+            
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
+                // 1. 数字员工基本信息
+                System.out.println("1. 数字员工基本信息");
+                System.out.println("====================");
+                
+                System.out.print("请输入数字员工姓名: ");
+                String name = reader.readLine().trim();
+                
+                System.out.print("请输入数字员工工号: ");
+                String jobId = reader.readLine().trim();
+                
+                System.out.print("请输入数字员工功能简介: ");
+                String description = reader.readLine().trim();
+                System.out.println();
+                
+                // 2. 大模型配置
+                System.out.println("2. 大模型配置");
+                System.out.println("====================");
+                
+                System.out.print("请输入大模型API密钥 (按回车使用默认值): ");
+                String apiKey = reader.readLine().trim();
+                
+                System.out.print("请输入大模型API地址 (按回车使用默认值): ");
+                String apiUrl = reader.readLine().trim();
+                
+                System.out.print("请输入大模型名称 (按回车使用默认值): ");
+                String model = reader.readLine().trim();
+                System.out.println();
+                
+                // 3. 邮箱配置
+                System.out.println("3. 邮箱配置");
+                System.out.println("====================");
+                
+                System.out.print("是否启用邮件功能？(y/n，默认n): ");
+                String enableMailInput = reader.readLine().trim();
+                boolean enableMail = "y".equalsIgnoreCase(enableMailInput);
+                
+                String mailHost = "";  // 邮件服务器主机
+                int mailPort = 465;    // 邮件服务器端口
+                String mailUsername = "";  // 用户名
+                String mailPassword = "";  // 密码
+                String mailFrom = "";  // 发件人地址
+                
+                if (enableMail) {
+                    System.out.print("请输入邮件服务器主机 (默认 smtp.qq.com): ");
+                    mailHost = reader.readLine().trim();
+                    if (mailHost.isEmpty()) {
+                        mailHost = "smtp.qq.com";
+                    }
+                    
+                    System.out.print("请输入邮件服务器端口 (默认 465): ");
+                    String portInput = reader.readLine().trim();
+                    if (!portInput.isEmpty()) {
+                        try {
+                            mailPort = Integer.parseInt(portInput);
+                        } catch (NumberFormatException e) {
+                            System.out.println("无效的端口号，使用默认值 465");
+                        }
+                    }
+                    
+                    System.out.print("请输入邮箱用户名: ");
+                    mailUsername = reader.readLine().trim();
+                    
+                    System.out.print("请输入邮箱密码/授权码: ");
+                    mailPassword = reader.readLine().trim();
+                    
+                    System.out.print("请输入发件人邮箱地址: ");
+                    mailFrom = reader.readLine().trim();
+                }
+                System.out.println();
+                
+                // 4. 初始化记忆文件
+                System.out.println("4. 初始化系统");
+                System.out.println("====================");
+                System.out.println("正在初始化系统文件...");
+                
+                // 初始化首次运行的记忆文件
+                longTermMemoryManager.initializeFirstRunFiles();
+                
+                // 更新数字员工信息
+                longTermMemoryManager.updateDigitalEmployeeInfo(name, jobId, description);
+                
+                // 更新大模型配置
+                if (!apiKey.isEmpty() || !apiUrl.isEmpty() || !model.isEmpty()) {
+                    configManager.updateLLMConfig(apiKey, apiUrl, model);
+                    configManager.saveConfig();
+                }
+                
+                // 更新邮箱配置
+                if (enableMail && !mailUsername.isEmpty() && !mailPassword.isEmpty() && !mailFrom.isEmpty()) {
+                    configManager.updateMailConfig(mailHost, mailPort, mailUsername, mailPassword, mailFrom);
+                    configManager.saveConfig();
+                }
+                
+                System.out.println("系统初始化完成！");
+                System.out.println("========================================");
+                System.out.println();
+                
+            } catch (Exception e) {
+                System.err.println("初始化系统失败: " + e.getMessage());
+            }
+        }
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
             String input;
