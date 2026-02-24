@@ -80,9 +80,9 @@ public class LongTermMemoryManager {
     private void initializeLongTermMemoryFiles() {
         // 初始化项目级长期记忆文件
         createDefaultFile(getProjectMemoryFilePath(MEMORY_FILE), getDefaultMemoryContent());
-        createDefaultFile(getProjectMemoryFilePath(USER_FILE), getDefaultUserContent());
+//        createDefaultFile(getProjectMemoryFilePath(USER_FILE), getDefaultUserContent());
         createDefaultFile(getProjectMemoryFilePath(SOUL_FILE), getDefaultSoulContent());
-        createDefaultFile(getProjectMemoryFilePath(IDENTITY_FILE), getDefaultIdentityContent());
+//        createDefaultFile(getProjectMemoryFilePath(IDENTITY_FILE), getDefaultIdentityContent());
 
         // 初始化全局级长期记忆文件
         createDefaultFile(getGlobalMemoryFilePath(MEMORY_FILE), "");
@@ -155,10 +155,10 @@ public class LongTermMemoryManager {
      */
     private String getDefaultIdentityContent() {
         return "# IDENTITY.md - Who Am I\n\n" +
-                "- **Name:** 苏映雪 (zjkj-sz-001)\n" +
+                "- **Name:**  (待设置)\n" +
                 "- **Creature:** 数字员工 (Digital Employee)\n" +
                 "- **Company:** 智教科技有限公司\n" +
-                "- **Job ID:** zjkj-sz-001\n" +
+                "- **Job ID:**  (待设置)\n" +
                 "- **Vibe:** 专业、高效、可靠\n" +
                 "- **Emoji:** ❄️\n" +
                 "- **Avatar:** (待设置)\n\n" +

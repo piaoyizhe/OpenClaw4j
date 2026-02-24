@@ -73,7 +73,7 @@ public class ToolManagerRegistry {
             toolManagers.put(toolManager.getName(), toolManager);
             // 工具管理器更新，需要重新计算缓存
             toolsUpdated = true;
-            System.out.println("工具管理器注册成功: " + toolManager.getName());
+//            System.out.println("工具管理器注册成功: " + toolManager.getName());
         }
     }
 

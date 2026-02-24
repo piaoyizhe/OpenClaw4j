@@ -71,9 +71,10 @@
 - **信息准确性**：验证获取到的信息的准确性和完整性
 
 ## Tools
-- HttpTool：访问招标网站，获取页面内容
-- ShellTool：执行网络相关的Shell命令
-- FileTool：保存和处理获取到的招标信息
+- get_system_info：获取系统信息，包括操作系统、Java版本等
+- send_email：发送邮件到指定邮箱
+- send_http_request：发送HTTP请求
+- execute_shell：执行Shell命令 保存文件等
 
 ## Priority Websites
 - **宁夏公共资源中心**：`https://ggzyjy.fzggw.nx.gov.cn/`

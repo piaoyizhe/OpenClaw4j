@@ -122,15 +122,13 @@ public class WorkflowManager {
      */
     public static class IntentRecognitionResult {
         private String intent; // 识别的意图
-        private String taskType; // 任务类型
         private String workflowName; // 推荐的工作流程
         private List<String> toolList; // 推荐的工具列表
         private double confidence; // 置信度
         private Map<String, Object> parameters; // 提取的参数
 
-        public IntentRecognitionResult(String intent, String taskType, String workflowName, List<String> toolList, double confidence, Map<String, Object> parameters) {
+        public IntentRecognitionResult(String intent, String workflowName, List<String> toolList, double confidence, Map<String, Object> parameters) {
             this.intent = intent;
-            this.taskType = taskType;
             this.workflowName = workflowName;
             this.toolList = toolList != null ? toolList : new ArrayList<>();
             this.confidence = confidence;
@@ -139,7 +137,6 @@ public class WorkflowManager {
 
         // Getter方法
         public String getIntent() { return intent; }
-        public String getTaskType() { return taskType; }
         public String getWorkflowName() { return workflowName; }
         public List<String> getToolList() { return toolList; }
         public double getConfidence() { return confidence; }
@@ -235,8 +232,7 @@ public class WorkflowManager {
             prompt.append("请返回JSON格式，包含以下字段：\n");
             prompt.append("{\n");
             prompt.append("  \"intent\": \"识别的意图\",\n");
-            prompt.append("  \"taskType\": \"任务类型\",\n");
-            prompt.append("  \"workflowName\": \"推荐使用的工作流程名称\",\n");
+            prompt.append("  \"workflowName\": \"推荐使用的工作流程名称，如果没有合适的你就返回：general_manual\",\n");
             prompt.append("  \"toolList\": [...],\n");
             prompt.append("  \"confidence\": 0.0-1.0,\n");
             prompt.append("  \"parameters\": {\n");
@@ -254,7 +250,6 @@ public class WorkflowManager {
             
             // 解析识别结果
             String intent = jsonResponse.getString("intent") != null ? jsonResponse.getString("intent") : "未知";
-            String taskType = jsonResponse.getString("taskType") != null ? jsonResponse.getString("taskType") : "未知";
             String workflowName = jsonResponse.getString("workflowName") != null ? jsonResponse.getString("workflowName") : "general_manual";
             JSONArray toolListJson = jsonResponse.getJSONArray("toolList");
             List<String> toolList = new ArrayList<>();
@@ -267,11 +262,11 @@ public class WorkflowManager {
             JSONObject parametersJson = jsonResponse.getJSONObject("parameters");
             Map<String, Object> parameters = parametersJson != null ? parametersJson : new HashMap<>();
             
-            return new IntentRecognitionResult(intent, taskType, workflowName, toolList, confidence, parameters);
+            return new IntentRecognitionResult(intent, workflowName, toolList, confidence, parameters);
         } catch (Exception e) {
             System.err.println("意图识别失败: " + e.getMessage());
             // 返回默认结果
-            return new IntentRecognitionResult("未知", "未知", "general_manual", new ArrayList<>(), 0.5, new HashMap<>());
+            return new IntentRecognitionResult("未知", "general_manual", new ArrayList<>(), 0.5, new HashMap<>());
         }
     }
 

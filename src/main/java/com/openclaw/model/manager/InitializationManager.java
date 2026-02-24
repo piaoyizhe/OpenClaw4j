@@ -54,7 +54,6 @@ public class InitializationManager {
 
         // 1. 自动创建必要的文件
         System.out.println("1. 自动创建必要的文件...");
-        // 这部分已经在LongTermMemoryManager中实现
 
         // 2. 引导用户输入一些内容（仅当USER.md文件不存在或不包含用户信息时）
         if (!isUserInfoExists()) {

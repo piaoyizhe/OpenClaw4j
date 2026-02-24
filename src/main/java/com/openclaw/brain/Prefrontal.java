@@ -201,7 +201,7 @@ public class Prefrontal {
 
             // 意图识别和工作流程管理
             WorkflowManager.IntentRecognitionResult intentResult = workflowManager.recognizeIntent(query);
-            System.out.println("意图识别结果: 意图=" + intentResult.getIntent() + ", 任务类型=" + intentResult.getTaskType() + ", 工作流程=" + intentResult.getWorkflowName());
+//            System.out.println("意图识别结果: 意图=" + intentResult.getIntent() + ", 工作流程=" + intentResult.getWorkflowName());
 
             // 使用大模型的工具调用功能
             String response = generateResponseWithToolCalls(query, intentResult);
@@ -259,7 +259,6 @@ public class Prefrontal {
         if (intentResult != null) {
             systemPrompt.append("# 意图识别结果\n");
             systemPrompt.append("意图: " + intentResult.getIntent() + "\n");
-            systemPrompt.append("任务类型: " + intentResult.getTaskType() + "\n");
             systemPrompt.append("工作流程: " + intentResult.getWorkflowName() + "\n");
             systemPrompt.append("所需工具: " + String.join(", ", intentResult.getToolList()) + "\n");
             systemPrompt.append("\n");
