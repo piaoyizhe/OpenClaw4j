@@ -15,9 +15,10 @@ public class EmailTest {
             String to = "591543227@qq.com";
             String subject = "测试邮件";
             String body = "这是一封测试邮件，用于测试邮件发送功能是否正常工作。";
+            String from = "591543227@qq.com"; // 发件人邮箱
             
             System.out.println("开始发送邮件...");
-            String result = emailUtils.sendEmail(to, subject, body);
+            String result = emailUtils.sendEmail(to, subject, body, from);
             System.out.println("发送结果: " + result);
         } catch (Exception e) {
             System.err.println("发送邮件失败: " + e.getMessage());

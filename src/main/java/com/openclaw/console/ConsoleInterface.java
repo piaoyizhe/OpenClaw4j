@@ -92,7 +92,7 @@ public class ConsoleInterface {
                 int mailPort = 465;    // 邮件服务器端口
                 String mailUsername = "";  // 用户名
                 String mailPassword = "";  // 密码
-                String mailFrom = "";  // 发件人地址
+                String mailSenderName = "";  // 发件人姓名
                 
                 if (enableMail) {
                     System.out.print("请输入邮件服务器主机 (默认 smtp.qq.com): ");
@@ -117,8 +117,8 @@ public class ConsoleInterface {
                     System.out.print("请输入邮箱密码/授权码: ");
                     mailPassword = reader.readLine().trim();
                     
-                    System.out.print("请输入发件人邮箱地址: ");
-                    mailFrom = reader.readLine().trim();
+                    System.out.print("请输入发件人姓名 (按回车留空): ");
+                    mailSenderName = reader.readLine().trim();
                 }
                 System.out.println();
                 
@@ -140,8 +140,8 @@ public class ConsoleInterface {
                 }
                 
                 // 更新邮箱配置
-                if (enableMail && !mailUsername.isEmpty() && !mailPassword.isEmpty() && !mailFrom.isEmpty()) {
-                    configManager.updateMailConfig(mailHost, mailPort, mailUsername, mailPassword, mailFrom);
+                if (enableMail && !mailUsername.isEmpty() && !mailPassword.isEmpty()) {
+                    configManager.updateMailConfig(mailHost, mailPort, mailUsername, mailPassword, mailSenderName);
                     configManager.saveConfig();
                 }
                 

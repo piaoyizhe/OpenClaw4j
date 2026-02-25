@@ -273,9 +273,14 @@ public class ConfigManager {
     }
 
     public String getMailFrom() {
+        // 直接返回username作为from
+        return getMailUsername();
+    }
+    
+    public String getMailSenderName() {
         Map<String, Object> mailConfig = getMailConfig();
         if (mailConfig != null) {
-            return (String) mailConfig.get("from");
+            return (String) mailConfig.getOrDefault("sender_name", "");
         }
         return "";
     }
@@ -347,9 +352,9 @@ public class ConfigManager {
      * @param port 邮件服务器端口
      * @param username 用户名
      * @param password 密码
-     * @param from 发件人地址
+     * @param senderName 发件人姓名
      */
-    public void updateMailConfig(String host, int port, String username, String password, String from) {
+    public void updateMailConfig(String host, int port, String username, String password, String senderName) {
         Map<String, Object> mailConfig = getMailConfig();
         if (host != null && !host.isEmpty()) {
             mailConfig.put("host", host);
@@ -363,8 +368,8 @@ public class ConfigManager {
         if (password != null && !password.isEmpty()) {
             mailConfig.put("password", password);
         }
-        if (from != null && !from.isEmpty()) {
-            mailConfig.put("from", from);
+        if (senderName != null && !senderName.isEmpty()) {
+            mailConfig.put("sender_name", senderName);
         }
         mailConfig.put("enabled", true);
     }

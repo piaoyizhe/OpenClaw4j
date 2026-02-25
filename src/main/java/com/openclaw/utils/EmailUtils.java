@@ -40,10 +40,11 @@ public class EmailUtils {
      * @param to 收件人邮箱
      * @param subject 邮件主题
      * @param body 邮件正文
+     * @param from 发件人邮箱（用于显示发送人）
      * @return 发送结果
      * @throws Exception 发送异常
      */
-    public String sendEmail(String to, String subject, String body) throws Exception {
+    public String sendEmail(String to, String subject, String body, String from) throws Exception {
         // 检查邮件配置是否启用
         if (!configManager.isMailEnabled()) {
             return "邮件发送功能未启用";
@@ -54,7 +55,7 @@ public class EmailUtils {
         int port = configManager.getMailPort();
         String username = configManager.getMailUsername();
         String password = configManager.getMailPassword();
-        String from = configManager.getMailFrom();
+        String senderName = configManager.getMailSenderName();
         boolean ssl = configManager.isMailSsl();
         int timeout = configManager.getMailTimeout();
 
@@ -96,7 +97,12 @@ public class EmailUtils {
 
         // 创建邮件消息
         MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(from));
+        // 如果有发送人名，使用"姓名 <邮箱>"格式
+        if (senderName != null && !senderName.isEmpty()) {
+            message.setFrom(new InternetAddress(from, senderName, "UTF-8"));
+        } else {
+            message.setFrom(new InternetAddress(from));
+        }
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
         message.setSubject(subject, "UTF-8");
         message.setText(body, "UTF-8");
@@ -128,6 +134,7 @@ public class EmailUtils {
         String username = configManager.getMailUsername();
         String password = configManager.getMailPassword();
         String from = configManager.getMailFrom();
+        String senderName = configManager.getMailSenderName();
         boolean ssl = configManager.isMailSsl();
         int timeout = configManager.getMailTimeout();
 
@@ -167,7 +174,12 @@ public class EmailUtils {
 
         // 创建邮件消息
         MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(from));
+        // 如果有发送人名，使用"姓名 <邮箱>"格式
+        if (senderName != null && !senderName.isEmpty()) {
+            message.setFrom(new InternetAddress(from, senderName, "UTF-8"));
+        } else {
+            message.setFrom(new InternetAddress(from));
+        }
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
         message.setSubject(subject, "UTF-8");
         message.setContent(htmlBody, "text/html;charset=UTF-8");

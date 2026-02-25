@@ -48,12 +48,14 @@ public class SystemToolManager extends AbstractToolManager {
         emailParams.put("to", "收件人邮箱地址");
         emailParams.put("subject", "邮件主题（姓名 - 内容标题）");
         emailParams.put("body", "邮件正文（不要使用markdown的正文）");
+        emailParams.put("from", "发件人邮箱地址（用于显示发送人）");
         registerTool("send_email", "发送邮件到指定邮箱", emailParams, (ToolInfo.ToolCaller) parameters -> {
             try {
                 String to = (String) parameters.get("to");
                 String subject = (String) parameters.get("subject");
                 String body = (String) parameters.get("body");
-                return sendEmail(to, subject, body);
+                String from = (String) parameters.get("from");
+                return sendEmail(to, subject, body, from);
             } catch (Exception e) {
                 return "发送邮件失败: " + e.getMessage();
             }
@@ -190,10 +192,11 @@ public class SystemToolManager extends AbstractToolManager {
      * @param to 收件人
      * @param subject 主题
      * @param body 正文
+     * @param from 发件人邮箱
      * @return 发送结果
      */
-    private String sendEmail(String to, String subject, String body) throws Exception {
+    private String sendEmail(String to, String subject, String body, String from) throws Exception {
         com.openclaw.utils.EmailUtils emailUtils = com.openclaw.utils.EmailUtils.getInstance();
-        return emailUtils.sendEmail(to, subject, body);
+        return emailUtils.sendEmail(to, subject, body, from);
     }
 }
