@@ -23,6 +23,15 @@ public class SystemToolManager extends AbstractToolManager {
      */
     @Override
     protected void registerDefaultTools() {
+        // 获取可用工具列表工具
+        registerTool("get_tools_list", "获取可用的工具列表", new ConcurrentHashMap<>(), (ToolInfo.ToolCaller) parameters -> {
+            try {
+                return getToolsInfoAsJsonArray().toJSONString();
+            } catch (Exception e) {
+                return "获取本地IP失败: " + e.getMessage();
+            }
+        });
+
         // 注册本地IP获取工具
         Map<String, String> localIpParams = new ConcurrentHashMap<>();
         registerTool("get_local_ip", "获取本地网络信息，包括主机名和IP地址", localIpParams, (ToolInfo.ToolCaller) parameters -> {
@@ -46,9 +55,9 @@ public class SystemToolManager extends AbstractToolManager {
         // 注册邮件发送工具
         Map<String, String> emailParams = new ConcurrentHashMap<>();
         emailParams.put("to", "收件人邮箱地址");
-        emailParams.put("subject", "邮件主题（姓名 - 内容标题）");
-        emailParams.put("body", "邮件正文（不要使用markdown的正文）");
-        emailParams.put("from", "发件人邮箱地址（用于显示发送人）");
+        emailParams.put("subject", "邮件主题");
+        emailParams.put("body", "邮件正文");
+        emailParams.put("from", "发件人姓名（如：张三，用于显示在邮件中）");
         registerTool("send_email", "发送邮件到指定邮箱", emailParams, (ToolInfo.ToolCaller) parameters -> {
             try {
                 String to = (String) parameters.get("to");
@@ -143,6 +152,98 @@ public class SystemToolManager extends AbstractToolManager {
             }
         });
 
+        // 注册定时任务工具
+        Map<String, String> scheduleTaskParams = new ConcurrentHashMap<>();
+        scheduleTaskParams.put("task_type", "任务类型：once（一次性）、fixed_rate（固定频率）、fixed_delay（固定延迟）");
+        scheduleTaskParams.put("initial_delay", "初始延迟（秒）");
+        scheduleTaskParams.put("period", "执行周期（秒），仅对fixed_rate和fixed_delay有效");
+        scheduleTaskParams.put("task_description", "任务描述");
+        registerTool("schedule_task", "调度定时任务", scheduleTaskParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String taskType = (String) parameters.get("task_type");
+                String initialDelayStr = (String) parameters.get("initial_delay");
+                String periodStr = (String) parameters.get("period");
+                String taskDescription = (String) parameters.get("task_description");
+
+                if (taskType == null || initialDelayStr == null) {
+                    return "任务类型和初始延迟不能为空。";
+                }
+
+                long initialDelay = Long.parseLong(initialDelayStr);
+                com.openclaw.utils.SchedulerUtils scheduler = com.openclaw.utils.SchedulerUtils.getInstance();
+                String taskId;
+
+                switch (taskType.toLowerCase()) {
+                    case "once":
+                        taskId = scheduler.scheduleTask(() -> {
+                            System.out.println("执行定时任务: " + taskDescription);
+                        }, initialDelay, java.util.concurrent.TimeUnit.SECONDS);
+                        break;
+                    case "fixed_rate":
+                        if (periodStr == null) {
+                            return "固定频率任务需要指定执行周期。";
+                        }
+                        long period = Long.parseLong(periodStr);
+                        taskId = scheduler.scheduleAtFixedRate(() -> {
+                            System.out.println("执行固定频率任务: " + taskDescription);
+                        }, initialDelay, period, java.util.concurrent.TimeUnit.SECONDS);
+                        break;
+                    case "fixed_delay":
+                        if (periodStr == null) {
+                            return "固定延迟任务需要指定执行周期。";
+                        }
+                        long delay = Long.parseLong(periodStr);
+                        taskId = scheduler.scheduleWithFixedDelay(() -> {
+                            System.out.println("执行固定延迟任务: " + taskDescription);
+                        }, initialDelay, delay, java.util.concurrent.TimeUnit.SECONDS);
+                        break;
+                    default:
+                        return "不支持的任务类型，支持：once、fixed_rate、fixed_delay。";
+                }
+
+                return "任务调度成功，任务ID: " + taskId;
+            } catch (Exception e) {
+                return "调度任务失败: " + e.getMessage();
+            }
+        });
+
+        // 注册列出定时任务工具
+        Map<String, String> listTasksParams = new ConcurrentHashMap<>();
+        registerTool("list_scheduled_tasks", "列出所有定时任务", listTasksParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                com.openclaw.utils.SchedulerUtils scheduler = com.openclaw.utils.SchedulerUtils.getInstance();
+                java.util.List<String> tasks = scheduler.listTasks();
+                if (tasks.isEmpty()) {
+                    return "当前没有定时任务。";
+                }
+                StringBuilder result = new StringBuilder();
+                result.append("当前定时任务:\n");
+                for (String taskId : tasks) {
+                    result.append("- " + taskId + " (运行中: " + scheduler.isTaskRunning(taskId) + ")\n");
+                }
+                return result.toString();
+            } catch (Exception e) {
+                return "列出任务失败: " + e.getMessage();
+            }
+        });
+
+        // 注册取消定时任务工具
+        Map<String, String> cancelTaskParams = new ConcurrentHashMap<>();
+        cancelTaskParams.put("task_id", "任务ID");
+        registerTool("cancel_scheduled_task", "取消定时任务", cancelTaskParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String taskId = (String) parameters.get("task_id");
+                if (taskId == null || taskId.isEmpty()) {
+                    return "任务ID不能为空。";
+                }
+                com.openclaw.utils.SchedulerUtils scheduler = com.openclaw.utils.SchedulerUtils.getInstance();
+                boolean success = scheduler.cancelTask(taskId);
+                return success ? "任务取消成功。" : "任务取消失败，可能任务不存在。";
+            } catch (Exception e) {
+                return "取消任务失败: " + e.getMessage();
+            }
+        });
+
 //        System.out.println("SystemToolManager初始化完成，注册了 " + toolRegistry.size() + " 个工具");
     }
 
@@ -192,7 +293,7 @@ public class SystemToolManager extends AbstractToolManager {
      * @param to 收件人
      * @param subject 主题
      * @param body 正文
-     * @param from 发件人邮箱
+     * @param from 发件人姓名（用于显示）
      * @return 发送结果
      */
     private String sendEmail(String to, String subject, String body, String from) throws Exception {

@@ -7,7 +7,9 @@ import okhttp3.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -694,5 +696,104 @@ public class LLMClient {
             combinedText.append(message).append("\n");
         }
         return calculateTokens(combinedText.toString());
+    }
+
+    public String recognizeImage(String imagePath, String prompt) throws OpenClawException {
+        try {
+            String apiKey = configManager.getLLMApiKey();
+            String apiUrl = configManager.getLLMApiUrl();
+            String visionModel = configManager.getLLMVisionModel();
+
+            if (apiKey == null || apiKey.isEmpty() || "your_api_key_here".equals(apiKey)) {
+                throw new Exception("API密钥未配置，请在application.yml文件中设置有效的API密钥");
+            }
+
+            if (apiUrl == null || apiUrl.isEmpty()) {
+                throw new Exception("API URL未配置，请在application.yml文件中设置有效的API URL");
+            }
+
+            File imageFile = new File(imagePath);
+            if (!imageFile.exists()) {
+                throw new Exception("图片文件不存在: " + imagePath);
+            }
+
+            byte[] imageBytes = Files.readAllBytes(imageFile.toPath());
+            String base64Image = java.util.Base64.getEncoder().encodeToString(imageBytes);
+
+            String imageType = getImageType(imagePath);
+            String base64Data = "data:" + imageType + ";base64," + base64Image;
+
+            JSONObject requestBody = new JSONObject();
+            requestBody.put("model", visionModel);
+            requestBody.put("stream", false);
+
+            JSONArray messagesArray = new JSONArray();
+            JSONObject message = new JSONObject();
+            message.put("role", "user");
+
+            JSONArray contentArray = new JSONArray();
+
+            JSONObject textContent = new JSONObject();
+            textContent.put("type", "text");
+            textContent.put("text", prompt != null && !prompt.isEmpty() ? prompt : "请详细描述这张图片的内容");
+            contentArray.add(textContent);
+
+            JSONObject imageContent = new JSONObject();
+            imageContent.put("type", "image_url");
+            JSONObject imageUrl = new JSONObject();
+            imageUrl.put("url", base64Data);
+            imageContent.put("image_url", imageUrl);
+            contentArray.add(imageContent);
+
+            message.put("content", contentArray);
+            messagesArray.add(message);
+
+            requestBody.put("messages", messagesArray);
+
+            Request request = new Request.Builder()
+                    .url(apiUrl)
+                    .post(RequestBody.create(
+                            requestBody.toString(),
+                            MediaType.parse("application/json")
+                    ))
+                    .addHeader("Authorization", "Bearer " + apiKey)
+                    .addHeader("Content-Type", "application/json")
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    String errorBody = response.body().string();
+                    throw new Exception("图片识别API请求失败: " + response.code() + " " + response.message() + " - " + errorBody);
+                }
+
+                String responseBody = response.body().string();
+                JSONObject jsonResponse = JSONObject.parseObject(responseBody);
+
+                JSONArray choices = jsonResponse.getJSONArray("choices");
+                if (choices.size() > 0) {
+                    JSONObject choice = choices.getJSONObject(0);
+                    JSONObject messageResponse = choice.getJSONObject("message");
+                    return messageResponse.getString("content");
+                } else {
+                    throw new Exception("图片识别API响应中没有可用的回复");
+                }
+            }
+        } catch (Exception e) {
+            throw new OpenClawException(OpenClawException.ErrorCode.API_ERROR, "图片识别失败", e);
+        }
+    }
+
+    private String getImageType(String imagePath) {
+        String lowerPath = imagePath.toLowerCase();
+        if (lowerPath.endsWith(".png")) {
+            return "image/png";
+        } else if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (lowerPath.endsWith(".gif")) {
+            return "image/gif";
+        } else if (lowerPath.endsWith(".webp")) {
+            return "image/webp";
+        }
+        return "image/jpeg";
     }
 }

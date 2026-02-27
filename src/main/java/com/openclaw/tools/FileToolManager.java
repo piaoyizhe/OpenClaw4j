@@ -1,6 +1,8 @@
 package com.openclaw.tools;
 
 import com.openclaw.model.entity.ToolInfo;
+import com.openclaw.utils.LLMClient;
+import com.openclaw.utils.FileReaderUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -193,6 +195,63 @@ public class FileToolManager extends AbstractToolManager {
                 return result.toString();
             } catch (Exception e) {
                 return "获取文件信息失败: " + e.getMessage();
+            }
+        });
+
+        // 注册图片识别工具
+        Map<String, String> recognizeImageParams = new ConcurrentHashMap<>();
+        recognizeImageParams.put("image_path", "图片文件路径");
+        recognizeImageParams.put("prompt", "识别提示词，可选，默认为'请详细描述这张图片的内容'");
+        registerTool("recognize_image", "使用视觉模型识别图片内容", recognizeImageParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String imagePath = (String) parameters.get("image_path");
+                String prompt = (String) parameters.get("prompt");
+                
+                if (imagePath == null || imagePath.isEmpty()) {
+                    return "图片路径不能为空。";
+                }
+                
+                java.io.File imageFile = new java.io.File(imagePath);
+                if (!imageFile.exists()) {
+                    return "图片文件不存在: " + imagePath;
+                }
+                
+                if (!FileReaderUtils.isImageFile(imagePath)) {
+                    return "不是有效的图片文件: " + imagePath;
+                }
+                
+                LLMClient llmClient = LLMClient.getInstance();
+                String result = llmClient.recognizeImage(imagePath, prompt);
+                return result;
+            } catch (Exception e) {
+                return "图片识别失败: " + e.getMessage();
+            }
+        });
+
+        // 注册文档读取工具
+        Map<String, String> readDocumentParams = new ConcurrentHashMap<>();
+        readDocumentParams.put("file_path", "文档文件路径");
+        registerTool("read_document", "读取文档内容（支持pdf、docx、txt等格式）", readDocumentParams, (ToolInfo.ToolCaller) parameters -> {
+            try {
+                String filePath = (String) parameters.get("file_path");
+                
+                if (filePath == null || filePath.isEmpty()) {
+                    return "文件路径不能为空。";
+                }
+                
+                java.io.File file = new java.io.File(filePath);
+                if (!file.exists()) {
+                    return "文件不存在: " + filePath;
+                }
+                
+                if (!FileReaderUtils.isSupportedDocument(filePath)) {
+                    return "不支持的文件格式: " + filePath + "\n支持的格式：pdf、docx、txt、md、csv、json、xml、html";
+                }
+                
+                String content = FileReaderUtils.readFile(filePath);
+                return content;
+            } catch (Exception e) {
+                return "读取文档失败: " + e.getMessage();
             }
         });
 

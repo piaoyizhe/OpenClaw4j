@@ -138,6 +138,11 @@ public class ConfigManager {
         return (String) llmConfig.get("model");
     }
 
+    public String getLLMVisionModel() {
+        Map<String, Object> llmConfig = getLLMConfig();
+        return (String) llmConfig.getOrDefault("vision_model", "glm-4.6v");
+    }
+
     public String getMemoryDirectory() {
         Map<String, Object> memoryConfig = getMemoryConfig();
         @SuppressWarnings("unchecked")

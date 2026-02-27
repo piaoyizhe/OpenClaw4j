@@ -40,7 +40,7 @@ public class EmailUtils {
      * @param to 收件人邮箱
      * @param subject 邮件主题
      * @param body 邮件正文
-     * @param from 发件人邮箱（用于显示发送人）
+     * @param from 发件人姓名（用于显示在邮件中）
      * @return 发送结果
      * @throws Exception 发送异常
      */
@@ -59,9 +59,13 @@ public class EmailUtils {
         boolean ssl = configManager.isMailSsl();
         int timeout = configManager.getMailTimeout();
 
+        // 如果传入了 from（发件人姓名），优先使用传入的姓名
+        if (from != null && !from.isEmpty()) {
+            senderName = from;
+        }
 
         // 验证配置
-        if (username.isEmpty() || password.isEmpty() || from.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty()) {
             return "邮件配置不完整";
         }
 
@@ -99,14 +103,14 @@ public class EmailUtils {
         MimeMessage message = new MimeMessage(session);
         // 如果有发送人名，使用"姓名 <邮箱>"格式
         if (senderName != null && !senderName.isEmpty()) {
-            message.setFrom(new InternetAddress(from, senderName, "UTF-8"));
+            message.setFrom(new InternetAddress(username, senderName, "UTF-8"));
         } else {
-            message.setFrom(new InternetAddress(from));
+            message.setFrom(new InternetAddress(username));
         }
         message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
         message.setSubject(subject, "UTF-8");
         message.setText(body, "UTF-8");
-        message.setReplyTo(new Address[]{new InternetAddress(from)});
+        message.setReplyTo(new Address[]{new InternetAddress(username)});
 
         // 发送邮件
         Transport.send(message);

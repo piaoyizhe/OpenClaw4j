@@ -54,7 +54,7 @@ public class ToolManagerRegistry {
      */
     private void initialize() {
         // 注册默认的工具管理器
-//        registerToolManager(new FileToolManager());
+        registerToolManager(new FileToolManager());
         registerToolManager(new SystemToolManager());
         registerToolManager(new MemoryToolManager());
         registerToolManager(new NetworkToolManager());

@@ -209,6 +209,9 @@ public class Prefrontal {
             // 添加系统响应到聊天历史记录
             addToChatHistory("助手", response);
 
+            // 播放提示音
+            com.openclaw.utils.SoundUtils.playCompleteSound();
+
             // 再次检查并压缩聊天历史
             checkAndCompressChatHistory();
 
@@ -379,7 +382,10 @@ public class Prefrontal {
         JSONArray filteredTools = new JSONArray();
         try {
             for (String toolName:requiredToolNames) {
-                filteredTools.add(allTools.get(toolName));
+                if(allTools.containsKey(toolName)){
+                    filteredTools.add(allTools.get(toolName));
+
+                }
             }
         } catch (Exception e) {
             System.err.println("过滤工具失败: " + e.getMessage());
